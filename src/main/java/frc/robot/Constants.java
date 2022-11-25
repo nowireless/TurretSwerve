@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.SwerveModule;
@@ -44,7 +45,6 @@ public final class Constants {
         public static final double ksVolts = 1; // TODO
         public static final double kvVoltSecondsPerMeter = 0.8; // TODO
         public static final double kaVoltSecondsSquaredPerMeter = 0.15; // TODO
-        public static final double kMaxSpeedMetersPerSecond = 3;
 
 
         // TODO description
@@ -78,10 +78,21 @@ public final class Constants {
         public static final double kPModuleTurningController = 1; // TODO FIXME
         public static final double kPModuleDriveController = 1; // TODO FIXME
 
-        public static final double kDriveVoltageCompensation = 12;
-        public static final double kDriveCurrentLimit = 80;
-        public static final double kSteerCurrentLimit = 20;
+        public static final double kDriveGearReduction = (12.0 / 40.0) * (20.0/40.0); //
+        public static final double kSteerGearReduction = (1.0 / 2.0) * (1.0/45.0); // Belt 2:1 -> Versa Planetary 1:45
 
+        public static final double kDriveVoltageCompensation = 12;
+        public static final int kDriveCurrentLimit = 80;
+        public static final int kSteerCurrentLimit = 20;
+
+        public static final double kSteerPIDProportional = 0;
+        public static final double kSteerPIDIntegral = 0;
+        public static final double kSteerPIDDerivative = 0;
+
+        //  FreeSpeed Radians   1 Rotation                     kWheelDiameter Meters   FreeSpeed * kGearReduction * kWheelDiameter Meters
+        //  ----------------- * ----------- * kGearReduction * --------------------- = --------------------------------------------------
+        //  1 Second            2PI Radians                    1 Rotation              2PI Second
+        public static final double kMaxVelocityMetersPerSecond = DCMotor.getNEO(1).freeSpeedRadPerSec / (2*Math.PI) * kDriveGearReduction * kWheelDiameterMeters;
 
         //
         // Individual module configuration
