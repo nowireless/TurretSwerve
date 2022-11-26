@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
 
@@ -26,17 +27,17 @@ public class DriveWithController extends CommandBase {
 
     @Override
     public void execute() {
-         double xMove = -controller.getLeftY();
-         double yMove = controller.getLeftX();
-         double rotate;
+        double xMove = -controller.getLeftY();
+        double yMove = -controller.getLeftX();
+        double rotate;
 
         double left = controller.getLeftTriggerAxis();
         double right = controller.getRightTriggerAxis();
 
-        if(left < right) {
-            rotate =  right;
+        if (left < right) {
+            rotate =  -right;
         } else {
-            rotate =  -left;
+            rotate =  left;
         }
 
         if (Math.abs(xMove) < kDeadband) {
@@ -74,6 +75,10 @@ public class DriveWithController extends CommandBase {
         xMove *= ModuleConstants.kMaxDriveVelocityMetersPerSecond;
         yMove *= ModuleConstants.kMaxDriveVelocityMetersPerSecond;
         rotate *= DriveConstants.kMaxAngularVelocityRadiansPerSecond;
+
+        SmartDashboard.putNumber("Drive - xMove", xMove);
+        SmartDashboard.putNumber("Drive - yMove", yMove);
+        SmartDashboard.putNumber("Drive - rotate", rotate);
 
         drive.drive(xMove, yMove, rotate, fieldOrient);
     }

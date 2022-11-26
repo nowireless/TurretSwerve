@@ -50,7 +50,7 @@ public class SwerveModule {
         // Drive motor configuration
         //
         driveMotor = new CANSparkMax(config.driveMotorID, CANSparkMax.MotorType.kBrushless);
-        driveMotor.setInverted(false);
+        driveMotor.setInverted(true);
 
         // Enable voltage compensation to 12 volts
         driveMotor.enableVoltageCompensation(ModuleConstants.kDriveVoltageCompensation);

@@ -88,20 +88,11 @@ public final class Constants {
         // Physical constants
         //
 
-        // These are example values only - DO NOT USE THESE FOR YOUR OWN ROBOT!
-        // These characterization values MUST be determined either experimentally or theoretically
-        // for *your* robot's drive.
-        // The SysId tool provides a convenient method for obtaining these values for your robot.
-        public static final double ksVolts = 1; // TODO
-        public static final double kvVoltSecondsPerMeter = 0.8; // TODO
-        public static final double kaVoltSecondsSquaredPerMeter = 0.15; // TODO
-
-
-        // TODO description
-        public static final double kWheelBaseLengthMeters = Units.inchesToMeters(30); // FIXME
+        // Distance between centers of the front and rear wheels on robot
+        public static final double kWheelBaseLengthMeters = Units.inchesToMeters(21.5);
 
         // Distance between centers of right and left wheels on robot
-        public static final double kTrackWidthMeters = Units.inchesToMeters(30); // FIXME
+        public static final double kTrackWidthMeters = Units.inchesToMeters(26);
 
         /**
          * The maximum angular velocity of the robot in radians per second.

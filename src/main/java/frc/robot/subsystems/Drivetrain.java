@@ -43,6 +43,13 @@ public class Drivetrain extends SubsystemBase {
     // IMU setup
     //
     imu = new Pigeon2(DriveConstants.kPigeonID, DriveConstants.kPigeonCANBus.busName);
+    var imuShuffleboard = tab.getLayout("IMU", BuiltInLayouts.kList)
+        .withSize(2,2)
+        .withPosition(8, 0);
+    imuShuffleboard.addNumber("Heading", ()->getHeading().getDegrees());
+    imuShuffleboard.addNumber("Temperature", ()->imu.getTemp() * 9.0/5.0+32.0);
+    imuShuffleboard.addNumber("Uptime", imu::getUpTime);
+
 
     //
     // Swerve Modules
@@ -121,11 +128,14 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
-   * Method to drive the robot using joystick info.
+   * Method to drive the robot using joystick info. All speeds are in meters per second.
    *
-   * @param xSpeed Speed of the robot in the x direction (forward).
-   * @param ySpeed Speed of the robot in the y direction (sideways).
-   * @param rot Angular rate of the robot.
+   * For more information, about coordinate systems see:
+   * https://docs.wpilib.org/en/stable/docs/software/advanced-controls/geometry/coordinate-systems.html
+   *
+   * @param xSpeed Speed of the robot in the x direction (forward). Positive values move forward.
+   * @param ySpeed Speed of the robot in the y direction (sideways). Positive values move left
+   * @param rot Angular rate of the robot. Positive values rotate counter-clockwise.
    * @param fieldRelative Whether the provided x and y speeds are relative to the field.
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
@@ -147,7 +157,6 @@ public class Drivetrain extends SubsystemBase {
    * Stop the drive train
    */
   public void stop() {
-    // TODO want a specail stop mode?
     drive(0, 0, 0, false);
   }
 
