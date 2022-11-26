@@ -67,7 +67,13 @@ public class SwerveModule {
 
         // Configure encoder
         driveEncoder = driveMotor.getEncoder();
-        double positionConversionFactor = Math.PI * ModuleConstants.kWheelDiameterMeters * ModuleConstants.kWheelDiameterMeters;
+        //
+        // 1) Motor Rotations * kDriveGearReduction => Wheel Rotations
+        // 2) PI * kWheelDiameterMeters => WheelDiameterCircumference
+        // 3) Wheel rotations * WheelDiameterCircumference => Distance traveled
+        //
+        // With 1, 2, 3 =>  (Motor Rotations * kDriveGearReduction) * (PI * kWheelDiameterMeters ) -> Distance traveled (meters)
+        double positionConversionFactor = Math.PI * ModuleConstants.kWheelDiameterMeters * ModuleConstants.kDriveGearReduction;
         driveEncoder.setPositionConversionFactor(positionConversionFactor);
         driveEncoder.setVelocityConversionFactor(positionConversionFactor / 60.0);
 

@@ -104,7 +104,6 @@ public final class Constants {
         public static final double kMaxAngularVelocityRadiansPerSecond = ModuleConstants.kMaxDriveVelocityMetersPerSecond /
             Math.hypot(kTrackWidthMeters / 2.0, kWheelBaseLengthMeters / 2.0);
 
-        // Distance between front and back wheels on robot
         public static final SwerveDriveKinematics kDriveKinematics =
             new SwerveDriveKinematics(
                 new Translation2d(kWheelBaseLengthMeters / 2, kTrackWidthMeters / 2),

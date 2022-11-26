@@ -11,9 +11,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import java.util.Arrays;
@@ -35,6 +38,10 @@ public class Drivetrain extends SubsystemBase {
   private final SwerveModule frontRight;
   private final SwerveModule rearRight;
   private final List<SwerveModule> modules;
+
+  // TODO move into a locationization/robot state class?
+  private final Field2d field = new Field2d();
+
 
   public Drivetrain() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
@@ -89,10 +96,21 @@ public class Drivetrain extends SubsystemBase {
     // Odometry class for tracking robot pose
     odometry = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, getHeading());
 
+    tab.add("Field", field)
+        .withSize(5, 4)
+        .withPosition(8,2)
+        .withWidget(BuiltInWidgets.kField);
+
+    var odometryTab = tab.getLayout("Odometry", BuiltInLayouts.kList)
+        .withSize(2, 2)
+        .withPosition(10,0);
+
+    odometryTab.addNumber("X (inches)", () -> Units.metersToInches(odometry.getPoseMeters().getX()));
+    odometryTab.addNumber("Y (inches)", () -> Units.metersToInches(odometry.getPoseMeters().getY()));
+    odometryTab.addNumber("Theta (degrees)", () -> odometry.getPoseMeters().getRotation().getDegrees());
   }
 
   public Rotation2d getHeading() {
-    // TODO make sure the angles here make sense
     return Rotation2d.fromDegrees(imu.getYaw());
   }
 
@@ -191,6 +209,8 @@ public class Drivetrain extends SubsystemBase {
         rearLeft.getState(),
         rearRight.getState()
     );
+
+    field.setRobotPose(odometry.getPoseMeters());
   }
 
   @Override
