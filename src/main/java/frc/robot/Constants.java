@@ -82,12 +82,13 @@ public final class Constants {
         public static final double kSteerGearReduction = (1.0 / 2.0) * (1.0/45.0); // Belt 2:1 -> Versa Planetary 1:45
 
         public static final double kDriveVoltageCompensation = 12;
+        public static final double kSteerVoltageCompensation = 12;
         public static final int kDriveCurrentLimit = 80;
         public static final int kSteerCurrentLimit = 20;
 
-        public static final double kSteerPIDProportional = 0;
+        public static final double kSteerPIDProportional = 0.02;
         public static final double kSteerPIDIntegral = 0;
-        public static final double kSteerPIDDerivative = 0;
+        public static final double kSteerPIDDerivative = 0.0;
 
         //  FreeSpeed Radians   1 Rotation                     kWheelDiameter Meters   FreeSpeed * kGearReduction * kWheelDiameter Meters
         //  ----------------- * ----------- * kGearReduction * --------------------- = --------------------------------------------------
@@ -100,25 +101,25 @@ public final class Constants {
         public static final SwerveModule.SwerveModuleConfiguration kFrontLeftConfig = new SwerveModule.SwerveModuleConfiguration(
             10,
             11,
-            Rotation2d.fromDegrees(0) // TODO
+            Rotation2d.fromDegrees(-64) // TODO
         );
 
         public static final SwerveModule.SwerveModuleConfiguration kRearLeftConfig = new SwerveModule.SwerveModuleConfiguration(
             12,
             13,
-            Rotation2d.fromDegrees(0) // TODO
+            Rotation2d.fromDegrees(70) // TODO
         );
 
         public static final SwerveModule.SwerveModuleConfiguration kFrontRightConfig = new SwerveModule.SwerveModuleConfiguration(
             14,
             15,
-            Rotation2d.fromDegrees(0) // TODO
+            Rotation2d.fromDegrees(-139) // TODO
         );
 
         public static final SwerveModule.SwerveModuleConfiguration kRearRightConfig = new SwerveModule.SwerveModuleConfiguration(
             16,
             17,
-            Rotation2d.fromDegrees(0) // TODO
+            Rotation2d.fromDegrees(-65) // TODO
         );
     }
 

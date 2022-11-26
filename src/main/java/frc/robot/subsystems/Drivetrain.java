@@ -11,6 +11,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import java.util.Arrays;
@@ -34,6 +37,7 @@ public class Drivetrain extends SubsystemBase {
   private final List<SwerveModule> modules;
 
   public Drivetrain() {
+    ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
 
     //
     // IMU setup
@@ -43,10 +47,30 @@ public class Drivetrain extends SubsystemBase {
     //
     // Swerve Modules
     //
-    frontLeft = new SwerveModule(ModuleConstants.kFrontLeftConfig);
-    rearLeft = new SwerveModule(ModuleConstants.kRearLeftConfig);
-    frontRight = new SwerveModule(ModuleConstants.kFrontRightConfig);
-    rearRight = new SwerveModule(ModuleConstants.kRearRightConfig);
+    frontLeft = new SwerveModule(
+        tab.getLayout("Front Left Module", BuiltInLayouts.kList)
+            .withSize(2, 4)
+            .withPosition(0, 0),
+        ModuleConstants.kFrontLeftConfig
+    );
+    rearLeft = new SwerveModule(
+        tab.getLayout("Back Left Module", BuiltInLayouts.kList)
+            .withSize(2, 4)
+            .withPosition(4, 0),
+        ModuleConstants.kRearLeftConfig
+    );
+    frontRight = new SwerveModule(
+        tab.getLayout("Front Right Module", BuiltInLayouts.kList)
+            .withSize(2, 4)
+            .withPosition(2, 0),
+        ModuleConstants.kFrontRightConfig
+    );
+    rearRight = new SwerveModule(
+        tab.getLayout("Back Right Module", BuiltInLayouts.kList)
+            .withSize(2, 4)
+            .withPosition(6, 0),
+        ModuleConstants.kRearRightConfig
+    );
 
     modules = Arrays.asList(
       frontLeft,

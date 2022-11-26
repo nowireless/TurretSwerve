@@ -3,9 +3,8 @@ package frc.robot.subsystems;
 import com.kennedyrobotics.hardware.motors.rev.CANSparkMax;
 import com.revrobotics.*;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 
 import static frc.robot.Constants.*;
 
@@ -24,15 +23,20 @@ public class SwerveModule {
         }
     }
 
+    // Hardware
     private final CANSparkMax driveMotor;
     private final RelativeEncoder driveEncoder;
     private final CANSparkMax steerMotor;
     private final SparkMaxAnalogSensor steerEncoder;
     private final SparkMaxPIDController steerPID;
+
+    // Config
     private final Rotation2d steerOffset;
 
+    // State
+    private SwerveModuleState desiredModuleState = new SwerveModuleState();
 
-    public SwerveModule(SwerveModuleConfiguration config) {
+    public SwerveModule(ShuffleboardLayout shuffleBoard, SwerveModuleConfiguration config) {
         //
         // Drive motor configuration
         //
@@ -69,14 +73,16 @@ public class SwerveModule {
         //
         // Steer motor configuration
         //
+        final boolean invertSteerMotor = true;
         steerMotor = new CANSparkMax(config.steerMotorID, CANSparkMax.MotorType.kBrushless);
+        steerMotor.setInverted(invertSteerMotor);
         steerOffset = config.steerOffset;
 
         // Enable voltage compensation to 12 volts
-        steerMotor.enableVoltageCompensation(ModuleConstants.kDriveVoltageCompensation);
+        steerMotor.enableVoltageCompensation(ModuleConstants.kSteerVoltageCompensation);
 
         // Set current limit in amps
-        steerMotor.setSmartCurrentLimit(ModuleConstants.kDriveCurrentLimit);
+        steerMotor.setSmartCurrentLimit(ModuleConstants.kSteerCurrentLimit);
 
         // Set brake mode
         steerMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
@@ -96,7 +102,7 @@ public class SwerveModule {
 
         // Steer Encoder
         steerEncoder = steerMotor.getAnalog(SparkMaxAnalogSensor.Mode.kAbsolute);
-        steerEncoder.setInverted(false);
+        steerEncoder.setInverted(!invertSteerMotor); // Opposite phase
         // Encoder is 1 to 1 gearing with the module.
         //           1 Revolution   360 Degrees
         // Voltage * ------------ * ------------ = Voltage * 360.0/3.3
@@ -114,6 +120,15 @@ public class SwerveModule {
         steerPID.setI(ModuleConstants.kSteerPIDIntegral);
         steerPID.setD(ModuleConstants.kSteerPIDDerivative);
         steerPID.setFeedbackDevice(steerEncoder);
+
+
+        // Shuffleboard
+        shuffleBoard.addNumber("Current Angle", () -> getAngle().getDegrees());
+        shuffleBoard.addNumber("Target Angle", () -> desiredModuleState.angle.getDegrees());
+        shuffleBoard.addNumber("Current Velocity", this::getVelocity);
+
+        shuffleBoard.addNumber("Raw Angle", () -> getRawAngle().getDegrees());
+
     }
 
     /**
@@ -121,9 +136,12 @@ public class SwerveModule {
      * @return
      */
     public Rotation2d getAngle() {
-        return Rotation2d.fromDegrees(steerEncoder.getPosition()).plus(steerOffset);
+        return getRawAngle().plus(steerOffset);
     }
 
+    public Rotation2d getRawAngle() {
+        return Rotation2d.fromDegrees(steerEncoder.getPosition());
+    }
     /**
      * Drive motor velocity
      * @return velocity in meters/second
@@ -144,16 +162,21 @@ public class SwerveModule {
     /**
      * Sets the desired state for the module.
      *
-     * @param desiredState Desired state with speed and angle.
+     * @param unoptimizedDesiredState Desired state with speed and angle.
      */
-    public void setDesiredState(SwerveModuleState desiredState) {
+    public void setDesiredState(SwerveModuleState unoptimizedDesiredState) {
+        // Apply the module offset before optimizing the angle, other wise the modules will freak out if we apply the
+        // offset manually when retrieving the angle, and when setting the PID controller
+        unoptimizedDesiredState.angle = unoptimizedDesiredState.angle.minus(steerOffset);
+
         // Optimize the reference state to avoid spinning further than 90 degrees
-        SwerveModuleState state = SwerveModuleState.optimize(desiredState, getAngle());
+        desiredModuleState = SwerveModuleState.optimize(unoptimizedDesiredState, getRawAngle());
 
         driveMotor.setVoltage(
-            (state.speedMetersPerSecond / ModuleConstants.kMaxVelocityMetersPerSecond) * ModuleConstants.kDriveVoltageCompensation
+            (desiredModuleState.speedMetersPerSecond / ModuleConstants.kMaxVelocityMetersPerSecond) * ModuleConstants.kDriveVoltageCompensation
         );
 
-        steerPID.setReference(state.angle.getDegrees(), CANSparkMax.ControlType.kPosition);
+        steerPID.setReference(desiredModuleState.angle.getDegrees(), CANSparkMax.ControlType.kPosition);
     }
+
 }
