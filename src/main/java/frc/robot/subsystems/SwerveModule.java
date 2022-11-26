@@ -1,9 +1,12 @@
 package frc.robot.subsystems;
 
-import com.kennedyrobotics.hardware.motors.rev.CANSparkMax;
 import com.revrobotics.*;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 
 import static frc.robot.Constants.*;
@@ -28,13 +31,19 @@ public class SwerveModule {
     private final RelativeEncoder driveEncoder;
     private final CANSparkMax steerMotor;
     private final SparkMaxAnalogSensor steerEncoder;
-    private final SparkMaxPIDController steerPID;
 
     // Config
     private final Rotation2d steerOffset;
 
     // State
     private SwerveModuleState desiredModuleState = new SwerveModuleState();
+
+    // NOTE: This PID controller works in Radians!
+    private final PIDController steerPIDController = new PIDController(
+        ModuleConstants.kPModuleTurningController,
+        0,
+        0
+    );
 
     public SwerveModule(ShuffleboardLayout shuffleBoard, SwerveModuleConfiguration config) {
         //
@@ -51,6 +60,10 @@ public class SwerveModule {
 
         // Set brake mode
         driveMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+
+        // Configure ramp rate
+        driveMotor.setOpenLoopRampRate(0.1); // This prevents stuttering
+
 
         // Configure encoder
         driveEncoder = driveMotor.getEncoder();
@@ -87,6 +100,9 @@ public class SwerveModule {
         // Set brake mode
         steerMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
+        // Configure ramp rate
+        steerMotor.setOpenLoopRampRate(0.05);
+
         // CAN status frames
         // Status 0: Applied output/Faults/Sticky Faults/Is Follower
         steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 100);
@@ -95,7 +111,7 @@ public class SwerveModule {
         // Status 2: Motor Position
         steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 20);
         // Status 3: Analog Sensor Voltage/Analog Sensor Velocity/Analog Sensor Position
-        steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus3, 20); // TODO TUNE, needed
+        steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus3, 10); // TODO TUNE, needed
         // Status 4: Alternate Encoder Velocity/Alternate Encoder Position
         // TODO this does not look settable
 
@@ -114,21 +130,21 @@ public class SwerveModule {
         // Second   3.3 Volts      1 Revolution   Second
         steerEncoder.setVelocityConversionFactor((360.0/3.3)); // Degrees per second
 
-        // Steer PID
-        steerPID = steerMotor.getPIDController();
-        steerPID.setP(ModuleConstants.kSteerPIDProportional);
-        steerPID.setI(ModuleConstants.kSteerPIDIntegral);
-        steerPID.setD(ModuleConstants.kSteerPIDDerivative);
-        steerPID.setFeedbackDevice(steerEncoder);
+        // Limit the PID Controller's input range between -pi and pi and set the input
+        // to be continuous.
+        steerPIDController.enableContinuousInput(-Math.PI, Math.PI);
 
-
-        // Shuffleboard
-        shuffleBoard.addNumber("Current Angle", () -> getAngle().getDegrees());
-        shuffleBoard.addNumber("Target Angle", () -> desiredModuleState.angle.getDegrees());
+        // Shuffleboard - Drive
         shuffleBoard.addNumber("Current Velocity", this::getVelocity);
 
+        // Shuffleboard - Steer
+        shuffleBoard.addNumber("Current Angle", () -> getAngle().getDegrees());
+        shuffleBoard.addNumber("Target Angle", () -> desiredModuleState.angle.getDegrees());
         shuffleBoard.addNumber("Raw Angle", () -> getRawAngle().getDegrees());
-
+        shuffleBoard.add("Steer PID", steerPIDController)
+                .withWidget(BuiltInWidgets.kPIDController);
+        shuffleBoard.addNumber("Steer PIDError", () -> Units.radiansToDegrees(steerPIDController.getPositionError()));
+        shuffleBoard.addNumber("Steer output percent", steerMotor::getAppliedOutput);
     }
 
     /**
@@ -165,18 +181,31 @@ public class SwerveModule {
      * @param unoptimizedDesiredState Desired state with speed and angle.
      */
     public void setDesiredState(SwerveModuleState unoptimizedDesiredState) {
-        // Apply the module offset before optimizing the angle, other wise the modules will freak out if we apply the
-        // offset manually when retrieving the angle, and when setting the PID controller
-        unoptimizedDesiredState.angle = unoptimizedDesiredState.angle.minus(steerOffset);
-
         // Optimize the reference state to avoid spinning further than 90 degrees
-        desiredModuleState = SwerveModuleState.optimize(unoptimizedDesiredState, getRawAngle());
+        desiredModuleState = SwerveModuleState.optimize(unoptimizedDesiredState, getAngle());
 
+        //
+        // Drive Motor
+        //
         driveMotor.setVoltage(
-            (desiredModuleState.speedMetersPerSecond / ModuleConstants.kMaxVelocityMetersPerSecond) * ModuleConstants.kDriveVoltageCompensation
+            // The voltage is being scaled by 12, instead of kDriveVoltageCompensation.
+            // If scaled by kDriveVoltageCompensation it will not be scalled corrected, as 10 volts is not the
+            // modules full free speed.
+            (desiredModuleState.speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond) * 12.0
         );
 
-        steerPID.setReference(desiredModuleState.angle.getDegrees(), CANSparkMax.ControlType.kPosition);
+        //
+        // Steer Motor
+        //
+
+        // Calculate the steer motor output voltage from the steering PID controller.
+        double steerVoltage = steerPIDController.calculate(getAngle().getRadians(), desiredModuleState.angle.getRadians());
+
+        // Clamp the turn output output to between -10 and 10
+        steerVoltage = MathUtil.clamp(steerVoltage, -ModuleConstants.kSteerVoltageCompensation, ModuleConstants.kSteerVoltageCompensation);
+
+        // Set voltage
+        steerMotor.setVoltage(steerVoltage);
     }
 
 }

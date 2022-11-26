@@ -33,67 +33,27 @@ public final class Constants {
         }
     }
 
-    public static class DriveConstants {
-        //
-        // Physical constants
-        //
-
-        // These are example values only - DO NOT USE THESE FOR YOUR OWN ROBOT!
-        // These characterization values MUST be determined either experimentally or theoretically
-        // for *your* robot's drive.
-        // The SysId tool provides a convenient method for obtaining these values for your robot.
-        public static final double ksVolts = 1; // TODO
-        public static final double kvVoltSecondsPerMeter = 0.8; // TODO
-        public static final double kaVoltSecondsSquaredPerMeter = 0.15; // TODO
-
-
-        // TODO description
-        public static final double kWheelBaseLengthMeters = Units.inchesToMeters(30); // FIXME
-
-        // Distance between centers of right and left wheels on robot
-        public static final double kTrackWidthMeters = Units.inchesToMeters(30); // FIXME
-
-        // Distance between front and back wheels on robot
-        public static final SwerveDriveKinematics kDriveKinematics =
-            new SwerveDriveKinematics(
-                new Translation2d(kWheelBaseLengthMeters / 2, kTrackWidthMeters / 2),
-                new Translation2d(kWheelBaseLengthMeters / 2, -kTrackWidthMeters / 2),
-                new Translation2d(-kWheelBaseLengthMeters / 2, kTrackWidthMeters / 2),
-                new Translation2d(-kWheelBaseLengthMeters / 2, -kTrackWidthMeters / 2));
-
-        //
-        // CAN BUS IDS
-        //
-        public static final int kPigeonID = 0;
-        public static final CANBus kPigeonCANBus = CANBus.kCANivore;
-    }
-
     public static class ModuleConstants {
         //
         // Global module configuration
         //
-        public static final double kMaxModuleAngularSpeedRadiansPerSecond = 2 * Math.PI;
-        public static final double kMaxModuleAngularAccelerationRadiansPerSecondSquared = 2 * Math.PI;
         public static final double kWheelDiameterMeters = Units.inchesToMeters(4);
-        public static final double kPModuleTurningController = 1; // TODO FIXME
+        public static final double kPModuleTurningController = 15; // TODO FIXME
         public static final double kPModuleDriveController = 1; // TODO FIXME
 
         public static final double kDriveGearReduction = (12.0 / 40.0) * (20.0/40.0); //
         public static final double kSteerGearReduction = (1.0 / 2.0) * (1.0/45.0); // Belt 2:1 -> Versa Planetary 1:45
 
-        public static final double kDriveVoltageCompensation = 12;
-        public static final double kSteerVoltageCompensation = 12;
+        public static final double kDriveVoltageCompensation = 10;
+        public static final double kSteerVoltageCompensation = 10;
         public static final int kDriveCurrentLimit = 80;
         public static final int kSteerCurrentLimit = 20;
 
-        public static final double kSteerPIDProportional = 0.02;
-        public static final double kSteerPIDIntegral = 0;
-        public static final double kSteerPIDDerivative = 0.0;
 
         //  FreeSpeed Radians   1 Rotation                     kWheelDiameter Meters   FreeSpeed * kGearReduction * kWheelDiameter Meters
         //  ----------------- * ----------- * kGearReduction * --------------------- = --------------------------------------------------
         //  1 Second            2PI Radians                    1 Rotation              2PI Second
-        public static final double kMaxVelocityMetersPerSecond = DCMotor.getNEO(1).freeSpeedRadPerSec / (2*Math.PI) * kDriveGearReduction * kWheelDiameterMeters;
+        public static final double kMaxDriveVelocityMetersPerSecond = DCMotor.getNEO(1).freeSpeedRadPerSec / (2*Math.PI) * kDriveGearReduction * kWheelDiameterMeters;
 
         //
         // Individual module configuration
@@ -121,6 +81,51 @@ public final class Constants {
             17,
             Rotation2d.fromDegrees(-65) // TODO
         );
+    }
+
+    public static class DriveConstants {
+        //
+        // Physical constants
+        //
+
+        // These are example values only - DO NOT USE THESE FOR YOUR OWN ROBOT!
+        // These characterization values MUST be determined either experimentally or theoretically
+        // for *your* robot's drive.
+        // The SysId tool provides a convenient method for obtaining these values for your robot.
+        public static final double ksVolts = 1; // TODO
+        public static final double kvVoltSecondsPerMeter = 0.8; // TODO
+        public static final double kaVoltSecondsSquaredPerMeter = 0.15; // TODO
+
+
+        // TODO description
+        public static final double kWheelBaseLengthMeters = Units.inchesToMeters(30); // FIXME
+
+        // Distance between centers of right and left wheels on robot
+        public static final double kTrackWidthMeters = Units.inchesToMeters(30); // FIXME
+
+        /**
+         * The maximum angular velocity of the robot in radians per second.
+         * <p>
+         * This is a measure of how fast the robot can rotate in place.
+         *
+         * Here we calculate the theoretical maximum angular velocity. You can also replace this with a measured amount.
+         */
+        public static final double kMaxAngularVelocityRadiansPerSecond = ModuleConstants.kMaxDriveVelocityMetersPerSecond /
+            Math.hypot(kTrackWidthMeters / 2.0, kWheelBaseLengthMeters / 2.0);
+
+        // Distance between front and back wheels on robot
+        public static final SwerveDriveKinematics kDriveKinematics =
+            new SwerveDriveKinematics(
+                new Translation2d(kWheelBaseLengthMeters / 2, kTrackWidthMeters / 2),
+                new Translation2d(kWheelBaseLengthMeters / 2, -kTrackWidthMeters / 2),
+                new Translation2d(-kWheelBaseLengthMeters / 2, kTrackWidthMeters / 2),
+                new Translation2d(-kWheelBaseLengthMeters / 2, -kTrackWidthMeters / 2));
+
+        //
+        // CAN BUS IDS
+        //
+        public static final int kPigeonID = 0;
+        public static final CANBus kPigeonCANBus = CANBus.kCANivore;
     }
 
     public static final class AutoConstants {

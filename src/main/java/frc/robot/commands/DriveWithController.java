@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
 
+import static frc.robot.Constants.*;
+
 public class DriveWithController extends CommandBase {
     private static final double kDeadband = 0.15;
 
@@ -54,12 +56,12 @@ public class DriveWithController extends CommandBase {
         rotate = Math.copySign(rotate * rotate, rotate);
 
         // TODO add an option, to easily nerf in this command
-        xMove *= 0.3;
-        yMove *= 0.3;
-        rotate *= 0.25;
-//        xMove *= 0.8;
-//        yMove *= 0.8;
-//        rotate *= 0.5;
+//        xMove *= 0.3;
+//        yMove *= 0.3;
+//        rotate *= 0.25;
+        xMove *= 0.8;
+        yMove *= 0.8;
+        rotate *= 0.5;
 
         if(controller.getAButton()) {
             fieldOrient = false;
@@ -67,6 +69,11 @@ public class DriveWithController extends CommandBase {
             fieldOrient = true;
         }
 
+        // Now we need to map the percentages to Meters (or Radians) per second, as that is what the drive train
+        // subsystem accepts
+        xMove *= ModuleConstants.kMaxDriveVelocityMetersPerSecond;
+        yMove *= ModuleConstants.kMaxDriveVelocityMetersPerSecond;
+        rotate *= DriveConstants.kMaxAngularVelocityRadiansPerSecond;
 
         drive.drive(xMove, yMove, rotate, fieldOrient);
     }

@@ -49,25 +49,25 @@ public class Drivetrain extends SubsystemBase {
     //
     frontLeft = new SwerveModule(
         tab.getLayout("Front Left Module", BuiltInLayouts.kList)
-            .withSize(2, 4)
+            .withSize(2, 6)
             .withPosition(0, 0),
         ModuleConstants.kFrontLeftConfig
     );
     rearLeft = new SwerveModule(
         tab.getLayout("Back Left Module", BuiltInLayouts.kList)
-            .withSize(2, 4)
+            .withSize(2, 6)
             .withPosition(4, 0),
         ModuleConstants.kRearLeftConfig
     );
     frontRight = new SwerveModule(
         tab.getLayout("Front Right Module", BuiltInLayouts.kList)
-            .withSize(2, 4)
+            .withSize(2, 6)
             .withPosition(2, 0),
         ModuleConstants.kFrontRightConfig
     );
     rearRight = new SwerveModule(
         tab.getLayout("Back Right Module", BuiltInLayouts.kList)
-            .withSize(2, 4)
+            .withSize(2, 6)
             .withPosition(6, 0),
         ModuleConstants.kRearRightConfig
     );
@@ -157,7 +157,7 @@ public class Drivetrain extends SubsystemBase {
    * @param desiredStates The desired SwerveModule states.
    */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
-    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, ModuleConstants.kMaxVelocityMetersPerSecond);
+    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, ModuleConstants.kMaxDriveVelocityMetersPerSecond);
 
     frontLeft.setDesiredState(desiredStates[0]);
     frontRight.setDesiredState(desiredStates[1]);
