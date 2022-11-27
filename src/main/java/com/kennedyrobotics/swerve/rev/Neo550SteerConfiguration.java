@@ -1,44 +1,45 @@
 package com.kennedyrobotics.swerve.rev;
 
 import com.swervedrivespecialties.swervelib.rev.NeoSteerConfiguration;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 import java.util.Objects;
 
-public class Neo550SteerConfiguration<EncoderConfiguration> {
+public class Neo550SteerConfiguration {
     private final int motorPort;
-    private final EncoderConfiguration encoderConfiguration;
+    private final Rotation2d moduleOffset;
 
-    public Neo550SteerConfiguration(int motorPort, EncoderConfiguration encoderConfiguration) {
+    public Neo550SteerConfiguration(int motorPort, Rotation2d moduleOffset) {
         this.motorPort = motorPort;
-        this.encoderConfiguration = encoderConfiguration;
+        this.moduleOffset = moduleOffset;
     }
 
     public int getMotorPort() {
         return motorPort;
     }
 
-    public EncoderConfiguration getEncoderConfiguration() {
-        return encoderConfiguration;
+    public Rotation2d getModuleOffset() {
+        return moduleOffset;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NeoSteerConfiguration<?> that = (NeoSteerConfiguration<?>) o;
-        return getMotorPort() == that.getMotorPort() && getEncoderConfiguration().equals(that.getEncoderConfiguration());
+        Neo550SteerConfiguration that = (Neo550SteerConfiguration) o;
+        return getMotorPort() == that.getMotorPort() && moduleOffset.equals(that.moduleOffset);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getMotorPort(), getEncoderConfiguration());
+        return Objects.hash(getMotorPort());
     }
 
     @Override
     public String toString() {
         return "Neo550SteerConfiguration{" +
             "motorPort=" + motorPort +
-            ", encoderConfiguration=" + encoderConfiguration +
+            ", moduleOffset=" + moduleOffset +
             '}';
     }
 }

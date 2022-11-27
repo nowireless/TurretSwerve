@@ -25,8 +25,6 @@ public class Neo550SteerControllerFactoryBuilder {
 
     private double rampRate = Double.NaN;
 
-    private Rotation2d moduleOffset = new Rotation2d();
-
     public Neo550SteerControllerFactoryBuilder withPidConstants(double proportional, double integral, double derivative) {
         this.pidProportional = proportional;
         this.pidIntegral = integral;
@@ -65,16 +63,11 @@ public class Neo550SteerControllerFactoryBuilder {
         return Double.isFinite(rampRate);
     }
 
-    public Neo550SteerControllerFactoryBuilder withModuleOffset(Rotation2d moduleOffset) {
-        this.moduleOffset = moduleOffset;
-        return this;
-    }
-
-    public <T> SteerControllerFactory<ControllerImplementation, Neo550SteerConfiguration<T>> build(AbsoluteEncoderFactory<T> encoderFactory) {
+    public <T> SteerControllerFactory<ControllerImplementation, Neo550SteerConfiguration> build(AbsoluteEncoderFactory<T> encoderFactory) {
         return new FactoryImplementation<>();
     }
 
-    public class FactoryImplementation<T> implements SteerControllerFactory<ControllerImplementation, Neo550SteerConfiguration<T>> {
+    public class FactoryImplementation<T> implements SteerControllerFactory<ControllerImplementation, Neo550SteerConfiguration> {
 
         public FactoryImplementation() {
         }
@@ -94,7 +87,7 @@ public class Neo550SteerControllerFactoryBuilder {
         }
 
         @Override
-        public ControllerImplementation create(Neo550SteerConfiguration<T> steerConfiguration, ModuleConfiguration moduleConfiguration) {
+        public ControllerImplementation create(Neo550SteerConfiguration steerConfiguration, ModuleConfiguration moduleConfiguration) {
             CANSparkMax motor = new CANSparkMax(steerConfiguration.getMotorPort(), CANSparkMaxLowLevel.MotorType.kBrushless);
             motor.setInverted(moduleConfiguration.isSteerInverted());
             checkNeoError(motor.setIdleMode(CANSparkMax.IdleMode.kBrake), "Failed to set NEO idle mode");
@@ -156,7 +149,7 @@ public class Neo550SteerControllerFactoryBuilder {
             // to be continuous.
             pidController.enableContinuousInput(-Math.PI, Math.PI);
 
-            return new ControllerImplementation(motor, absoluteEncoder, moduleOffset, pidController, nominalVoltage);
+            return new ControllerImplementation(motor, absoluteEncoder, steerConfiguration.getModuleOffset(), pidController, nominalVoltage);
         }
     }
 

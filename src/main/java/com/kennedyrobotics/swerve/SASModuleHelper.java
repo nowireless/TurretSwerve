@@ -19,13 +19,12 @@ public class SASModuleHelper {
             .build();
     }
 
-    private static SteerControllerFactory<?, Neo550SteerConfiguration<NullAbsoluteEncoderConfiguration>> getNeo550SteerFactory(SASModuleConfiguration configuration, Rotation2d moduleOffset) {
+    private static SteerControllerFactory<?, Neo550SteerConfiguration> getNeo550SteerFactory(SASModuleConfiguration configuration) {
         return new Neo550SteerControllerFactoryBuilder()
             .withVoltageCompensation(configuration.getNominalVoltage())
             .withPidConstants(15, 0, 0) // TODO add to SASModuleConfiguration
             .withCurrentLimit(configuration.getSteerCurrentLimit())
             .withRampRate(0.1) // This prevents the module from stuttering, TODO add to SASModuleConfiguration
-            .withModuleOffset(moduleOffset)
             .build(new NullAbsoluteEncoderFactoryBuilder().build());
     }
 
@@ -50,13 +49,13 @@ public class SASModuleHelper {
         return new SwerveModuleFactory<> (
             gearRatio.getConfiguration(),
             getNeoDriveFactory(configuration),
-            getNeo550SteerFactory(configuration, steerOffsetDegrees)
+            getNeo550SteerFactory(configuration)
         ).create(
             container,
             driveMotorPort,
-            new Neo550SteerConfiguration<>(
+            new Neo550SteerConfiguration(
                 steerMotorPort,
-                new NullAbsoluteEncoderConfiguration()
+                steerOffsetDegrees
             )
         );
     }
