@@ -1,5 +1,7 @@
 package com.kennedyrobotics.swerve;
 
+import com.kennedyrobotics.swerve.ctre.TalonSRXSteerConfiguration;
+import com.kennedyrobotics.swerve.ctre.TalonSRXSteerControllerFactoryBuilder;
 import com.kennedyrobotics.swerve.rev.Neo550SteerConfiguration;
 import com.kennedyrobotics.swerve.rev.Neo550SteerControllerFactoryBuilder;
 import com.kennedyrobotics.swerve.rev.NeoDriveControllerFactoryBuilder;
@@ -24,6 +26,47 @@ public class SASModuleHelper {
             .withCurrentLimit(configuration.getSteerCurrentLimit())
             .withRampRate(0.1) // This prevents the module from stuttering, TODO add to SASModuleConfiguration
             .build();
+    }
+
+    private static SteerControllerFactory<?, TalonSRXSteerConfiguration> getTalonSRXSteerFactory(SASModuleConfiguration configuration) {
+        return new TalonSRXSteerControllerFactoryBuilder()
+            .withVoltageCompensation(configuration.getNominalVoltage())
+            .withPidConstants(15, 0, 0) // TODO add to SASModuleConfiguration
+            .withCurrentLimit(configuration.getSteerCurrentLimit())
+            .withRampRate(0.1) // This prevents the module from stuttering, TODO add to SASModuleConfiguration
+            .build();
+    }
+
+    /**
+     *
+     * @param container
+     * @param configuration
+     * @param gearRatio
+     * @param driveMotorPort
+     * @param steerMotorPort
+     * @param steerOffsetDegrees
+     * @return
+     */
+    public static SwerveModule createV1(
+        ShuffleboardLayout container,
+        SASModuleConfiguration configuration,
+        GearRatio gearRatio,
+        int driveMotorPort,
+        int steerMotorPort,
+        Rotation2d steerOffsetDegrees
+    ) {
+        return new SwerveModuleFactory<> (
+            gearRatio.getConfiguration(),
+            getNeoDriveFactory(configuration),
+            getTalonSRXSteerFactory(configuration)
+        ).create(
+            container,
+            driveMotorPort,
+            new TalonSRXSteerConfiguration(
+                steerMotorPort,
+                steerOffsetDegrees
+            )
+        );
     }
 
     /**

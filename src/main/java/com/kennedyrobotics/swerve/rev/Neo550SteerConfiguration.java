@@ -1,6 +1,5 @@
 package com.kennedyrobotics.swerve.rev;
 
-import com.swervedrivespecialties.swervelib.rev.NeoSteerConfiguration;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 import java.util.Objects;

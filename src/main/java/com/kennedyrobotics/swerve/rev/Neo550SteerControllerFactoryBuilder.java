@@ -143,8 +143,7 @@ public class Neo550SteerControllerFactoryBuilder {
                 pidIntegral,
                 pidDerivative
             );
-            // Limit
-            // the PID Controller's input range between -pi and pi and set the input
+            // Limit the PID Controller's input range between -pi and pi and set the input
             // to be continuous.
             pidController.enableContinuousInput(-Math.PI, Math.PI);
 
