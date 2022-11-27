@@ -5,7 +5,6 @@ import com.swervedrivespecialties.swervelib.AbsoluteEncoderFactory;
 import com.swervedrivespecialties.swervelib.ModuleConfiguration;
 import com.swervedrivespecialties.swervelib.SteerController;
 import com.swervedrivespecialties.swervelib.SteerControllerFactory;
-import com.swervedrivespecialties.swervelib.rev.NeoSteerConfiguration;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;

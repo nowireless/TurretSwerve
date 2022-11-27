@@ -1,5 +1,9 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.util.CircularBuffer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -12,7 +16,21 @@ public class DriveWithController extends CommandBase {
 
     private final Drivetrain drive;
     private final XboxController controller;
+
+    // State
     private boolean fieldOrient;
+    private boolean lastMovingState = false;
+    private SwerveModuleState[] latchedModuleStates;
+
+    // Keep track of the last 5 module angles
+    private static final int kAngleHistoryMilliseconds = 100;
+    private static final int kAngleHistoryLength = kAngleHistoryMilliseconds/20;
+    private CircularBuffer[] lastModuleAngles = {
+        new CircularBuffer(kAngleHistoryLength),
+        new CircularBuffer(kAngleHistoryLength),
+        new CircularBuffer(kAngleHistoryLength),
+        new CircularBuffer(kAngleHistoryLength)
+    };
 
     public DriveWithController(Drivetrain drive, XboxController controller) {
         this.drive = drive;
@@ -23,10 +41,20 @@ public class DriveWithController extends CommandBase {
     @Override
     public void initialize() {
         fieldOrient = false;
+        lastMovingState = false;
+
+        // Flush buffers with current module angles
+        SwerveModuleState[] currentModuleState = drive.getModuleStates();
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < kAngleHistoryLength; j++) {
+                lastModuleAngles[i].addLast(currentModuleState[i].angle.getDegrees());
+            }
+        }
     }
 
     @Override
     public void execute() {
+        // Read gamepad state
         double xMove = -controller.getLeftY();
         double yMove = -controller.getLeftX();
         double rotate;
@@ -40,47 +68,74 @@ public class DriveWithController extends CommandBase {
             rotate =  left;
         }
 
-        if (Math.abs(xMove) < kDeadband) {
-            xMove = 0;
+        // Apply deadband
+        xMove = MathUtil.applyDeadband(xMove, kDeadband);
+        yMove = MathUtil.applyDeadband(yMove, kDeadband);
+        rotate = MathUtil.applyDeadband(rotate, kDeadband);
+
+        // Determine if the robot should be moving,
+        boolean moving = xMove != 0 || yMove != 0 || rotate != 0;
+
+        // Capture module angles
+        SwerveModuleState[] currentModuleState = drive.getModuleStates();
+        for (int i = 0; i < 4; i++) {
+            lastModuleAngles[i].addLast(currentModuleState[i].angle.getDegrees());
         }
 
-        if (Math.abs(yMove) < kDeadband) {
-            yMove = 0;
+        if (moving) {
+            xMove = Math.copySign(xMove * xMove, xMove);
+            yMove = Math.copySign(yMove * yMove, yMove);
+            rotate = Math.copySign(rotate * rotate, rotate);
+
+            // TODO add an option, to easily nerf in this command
+            // xMove *= 0.3;
+            // yMove *= 0.3;
+            // rotate *= 0.25;
+            xMove *= 0.8;
+            yMove *= 0.8;
+            rotate *= 0.5;
+
+            if (controller.getAButton()) {
+                fieldOrient = false;
+            } else if (controller.getBButton()) {
+                fieldOrient = true;
+            }
+
+            // Now we need to map the percentages to Meters (or Radians) per second, as that is what the drive train
+            // subsystem accepts
+            xMove *= ModuleConstants.kMaxDriveVelocityMetersPerSecond;
+            yMove *= ModuleConstants.kMaxDriveVelocityMetersPerSecond;
+            rotate *= DriveConstants.kMaxAngularVelocityRadiansPerSecond;
+
+            SmartDashboard.putNumber("DriveWithController - xMove", xMove);
+            SmartDashboard.putNumber("DriveWithController - yMove", yMove);
+            SmartDashboard.putNumber("DriveWithController - rotate", rotate);
+
+            drive.drive(xMove, yMove, rotate, fieldOrient);
+        } else {
+            // The robot is currently not moving. Check to see if the robot was moving
+            if (lastMovingState || latchedModuleStates == null) {
+                // The robot was moving and is now moving, so we need to latch the last module states for the "idle"
+                // position
+                latchedModuleStates = new SwerveModuleState[]{
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(lastModuleAngles[0].get(0))),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(lastModuleAngles[1].get(0))),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(lastModuleAngles[2].get(0))),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(lastModuleAngles[3].get(0))),
+                };
+                SmartDashboard.putNumber("Latched Module Angle 0", latchedModuleStates[0].angle.getDegrees());
+            }
+
+            drive.setModuleStates(latchedModuleStates);
         }
 
-        if (Math.abs(rotate) < kDeadband) {
-            rotate = 0;
-        }
+        SmartDashboard.putNumber("Last Module Angle Buffer 0[oldest]", lastModuleAngles[0].get(0));
+        SmartDashboard.putNumber("Last Module Angle Buffer 0[latest]", lastModuleAngles[0].get(kAngleHistoryLength-1));
 
-        xMove = Math.copySign(xMove * xMove, xMove);
-        yMove = Math.copySign(yMove * yMove, yMove);
-        rotate = Math.copySign(rotate * rotate, rotate);
+        SmartDashboard.putBoolean("DriveWithController - Moving", moving);
+        SmartDashboard.putBoolean("DriveWithController - Field oriented", fieldOrient);
 
-        // TODO add an option, to easily nerf in this command
-//        xMove *= 0.3;
-//        yMove *= 0.3;
-//        rotate *= 0.25;
-        xMove *= 0.8;
-        yMove *= 0.8;
-        rotate *= 0.5;
-
-        if(controller.getAButton()) {
-            fieldOrient = false;
-        } else if (controller.getBButton()) {
-            fieldOrient = true;
-        }
-
-        // Now we need to map the percentages to Meters (or Radians) per second, as that is what the drive train
-        // subsystem accepts
-        xMove *= ModuleConstants.kMaxDriveVelocityMetersPerSecond;
-        yMove *= ModuleConstants.kMaxDriveVelocityMetersPerSecond;
-        rotate *= DriveConstants.kMaxAngularVelocityRadiansPerSecond;
-
-        SmartDashboard.putNumber("Drive - xMove", xMove);
-        SmartDashboard.putNumber("Drive - yMove", yMove);
-        SmartDashboard.putNumber("Drive - rotate", rotate);
-
-        drive.drive(xMove, yMove, rotate, fieldOrient);
+        lastMovingState = moving;
     }
 
     @Override

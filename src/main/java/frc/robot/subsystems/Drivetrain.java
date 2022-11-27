@@ -248,6 +248,16 @@ public class Drivetrain extends SubsystemBase {
     );
   }
 
+  public SwerveModuleState[] getModuleStates() {
+    // Note the order of modules needs to match the order provided to DriveConstants.kDriveKinematics
+    return new SwerveModuleState[]{
+        new SwerveModuleState(m_frontLeft.getDriveVelocity(), new Rotation2d(m_frontLeft.getSteerAngle())),
+        new SwerveModuleState(m_frontRight.getDriveVelocity(), new Rotation2d(m_frontRight.getSteerAngle())),
+        new SwerveModuleState(m_rearLeft.getDriveVelocity(), new Rotation2d(m_rearLeft.getSteerAngle())),
+        new SwerveModuleState(m_rearRight.getDriveVelocity(), new Rotation2d(m_rearRight.getSteerAngle()))
+    };
+  }
+
   /** Zeroes the heading of the robot. */
   public void zeroHeading() {
     m_imu.setYaw(0);
@@ -258,13 +268,13 @@ public class Drivetrain extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // Update the odometry in the periodic block
-    // Note the order of modules needs to match the order provided to DriveConstants.kDriveKinematics
+    SwerveModuleState[] moduleStates = getModuleStates();
     m_odometry.update(
         getHeading(),
-        new SwerveModuleState(m_frontLeft.getDriveVelocity(), new Rotation2d(m_frontLeft.getSteerAngle())),
-        new SwerveModuleState(m_frontRight.getDriveVelocity(), new Rotation2d(m_frontRight.getSteerAngle())),
-        new SwerveModuleState(m_rearLeft.getDriveVelocity(), new Rotation2d(m_rearLeft.getSteerAngle())),
-        new SwerveModuleState(m_rearRight.getDriveVelocity(), new Rotation2d(m_rearRight.getSteerAngle()))
+        moduleStates[0],
+        moduleStates[1],
+        moduleStates[2],
+        moduleStates[3]
     );
 
     m_field.setRobotPose(m_odometry.getPoseMeters());
