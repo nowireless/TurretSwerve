@@ -1,7 +1,5 @@
 package com.kennedyrobotics.swerve;
 
-import com.kennedyrobotics.swerve.misc.NullAbsoluteEncoderConfiguration;
-import com.kennedyrobotics.swerve.misc.NullAbsoluteEncoderFactoryBuilder;
 import com.kennedyrobotics.swerve.rev.Neo550SteerConfiguration;
 import com.kennedyrobotics.swerve.rev.Neo550SteerControllerFactoryBuilder;
 import com.kennedyrobotics.swerve.rev.NeoDriveControllerFactoryBuilder;
@@ -25,7 +23,7 @@ public class SASModuleHelper {
             .withPidConstants(15, 0, 0) // TODO add to SASModuleConfiguration
             .withCurrentLimit(configuration.getSteerCurrentLimit())
             .withRampRate(0.1) // This prevents the module from stuttering, TODO add to SASModuleConfiguration
-            .build(new NullAbsoluteEncoderFactoryBuilder().build());
+            .build();
     }
 
     /**

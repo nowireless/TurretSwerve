@@ -1,7 +1,6 @@
 package com.kennedyrobotics.swerve.rev;
 
 import com.revrobotics.*;
-import com.swervedrivespecialties.swervelib.AbsoluteEncoderFactory;
 import com.swervedrivespecialties.swervelib.ModuleConfiguration;
 import com.swervedrivespecialties.swervelib.SteerController;
 import com.swervedrivespecialties.swervelib.SteerControllerFactory;
@@ -63,7 +62,7 @@ public class Neo550SteerControllerFactoryBuilder {
         return Double.isFinite(rampRate);
     }
 
-    public <T> SteerControllerFactory<ControllerImplementation, Neo550SteerConfiguration> build(AbsoluteEncoderFactory<T> encoderFactory) {
+    public <T> SteerControllerFactory<ControllerImplementation, Neo550SteerConfiguration> build() {
         return new FactoryImplementation<>();
     }
 
