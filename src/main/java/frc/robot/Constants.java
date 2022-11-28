@@ -33,21 +33,52 @@ public final class Constants {
         }
     }
 
-    public static class ModuleConstants {
+    public static class DriveConstants {
         //
-        // Global module configuration
+        // Physical constants
         //
-        public static final double kWheelDiameterMeters = Units.inchesToMeters(4);
-
-        public static final double kDriveGearReduction = SASModuleHelper.GearRatio.V2.getConfiguration().getDriveReduction();
 
         public static final double kDriveVoltageCompensation = 10;
 
+        // Size of the module wheel
+        public static final double kWheelDiameterMeters = Units.inchesToMeters(4);
+
+        // Distance between centers of the front and rear wheels on robot
+        public static final double kWheelBaseLengthMeters = Units.inchesToMeters(21.5);
+
+        // Distance between centers of right and left wheels on robot
+        public static final double kTrackWidthMeters = Units.inchesToMeters(26);
+
+        public static final double kDriveGearReduction = SASModuleHelper.GearRatio.V2.getConfiguration().getDriveReduction();
 
         //  FreeSpeed Radians   1 Rotation                     kWheelDiameter Meters   Voltage Nominal   FreeSpeed * kGearReduction * kWheelDiameter Meters
         //  ----------------- * ----------- * kGearReduction * --------------------- * --------------- = --------------------------------------------------
         //  1 Second            2PI Radians                    1 Rotation              Voltage Max       2PI Second
         public static final double kMaxDriveVelocityMetersPerSecond = DCMotor.getNEO(1).freeSpeedRadPerSec / (2*Math.PI) * kDriveGearReduction * kWheelDiameterMeters * (kDriveVoltageCompensation/12.0);
+
+        /**
+         * The maximum angular velocity of the robot in radians per second.
+         * <p>
+         * This is a measure of how fast the robot can rotate in place.
+         *
+         * Here we calculate the theoretical maximum angular velocity. You can also replace this with a measured amount.
+         */
+        public static final double kMaxAngularVelocityRadiansPerSecond = kMaxDriveVelocityMetersPerSecond /
+            Math.hypot(kTrackWidthMeters / 2.0, kWheelBaseLengthMeters / 2.0);
+
+        public static final SwerveDriveKinematics kDriveKinematics =
+            new SwerveDriveKinematics(
+                new Translation2d(kWheelBaseLengthMeters / 2, kTrackWidthMeters / 2),
+                new Translation2d(kWheelBaseLengthMeters / 2, -kTrackWidthMeters / 2),
+                new Translation2d(-kWheelBaseLengthMeters / 2, kTrackWidthMeters / 2),
+                new Translation2d(-kWheelBaseLengthMeters / 2, -kTrackWidthMeters / 2));
+
+        //
+        // IMU
+        //
+        public static final int kPigeonID = 0;
+        public static final CANBus kPigeonCANBus = CANBus.kCANivore;
+        public static final boolean kPigeonUpsideDown = false;
 
         //
         // Individual module configuration
@@ -71,42 +102,6 @@ public final class Constants {
         public static final int kRearRightMotorSteerID = 17;
         public static final int kRearRightEncoderID = 17;
         public static final Rotation2d kRearRightOffset = Rotation2d.fromDegrees(-65);
-    }
-
-    public static class DriveConstants {
-        //
-        // Physical constants
-        //
-
-        // Distance between centers of the front and rear wheels on robot
-        public static final double kWheelBaseLengthMeters = Units.inchesToMeters(21.5);
-
-        // Distance between centers of right and left wheels on robot
-        public static final double kTrackWidthMeters = Units.inchesToMeters(26);
-
-        /**
-         * The maximum angular velocity of the robot in radians per second.
-         * <p>
-         * This is a measure of how fast the robot can rotate in place.
-         *
-         * Here we calculate the theoretical maximum angular velocity. You can also replace this with a measured amount.
-         */
-        public static final double kMaxAngularVelocityRadiansPerSecond = ModuleConstants.kMaxDriveVelocityMetersPerSecond /
-            Math.hypot(kTrackWidthMeters / 2.0, kWheelBaseLengthMeters / 2.0);
-
-        public static final SwerveDriveKinematics kDriveKinematics =
-            new SwerveDriveKinematics(
-                new Translation2d(kWheelBaseLengthMeters / 2, kTrackWidthMeters / 2),
-                new Translation2d(kWheelBaseLengthMeters / 2, -kTrackWidthMeters / 2),
-                new Translation2d(-kWheelBaseLengthMeters / 2, kTrackWidthMeters / 2),
-                new Translation2d(-kWheelBaseLengthMeters / 2, -kTrackWidthMeters / 2));
-
-        //
-        // CAN BUS IDS
-        //
-        public static final int kPigeonID = 0;
-        public static final CANBus kPigeonCANBus = CANBus.kCANivore;
-        public static final boolean kPigeonUpsideDown = false;
     }
 
     public static final class AutoConstants {
