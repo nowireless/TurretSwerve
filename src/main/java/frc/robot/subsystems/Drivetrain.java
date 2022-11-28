@@ -152,7 +152,13 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Rotation2d getHeading() {
-    return Rotation2d.fromDegrees(m_imu.getYaw());
+    Rotation2d heading = Rotation2d.fromDegrees(m_imu.getYaw());
+
+    if (DriveConstants.kPigeonUpsideDown) {
+      heading = heading.unaryMinus();
+    }
+
+    return heading;
   }
 
   /**

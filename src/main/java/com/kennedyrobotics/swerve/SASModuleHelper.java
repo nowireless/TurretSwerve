@@ -31,7 +31,7 @@ public class SASModuleHelper {
     private static SteerControllerFactory<?, TalonSRXSteerConfiguration> getTalonSRXSteerFactory(SASModuleConfiguration configuration) {
         return new TalonSRXSteerControllerFactoryBuilder()
             .withVoltageCompensation(configuration.getNominalVoltage())
-            .withPidConstants(15, 0, 0) // TODO add to SASModuleConfiguration
+            .withPidConstants(25, 0, 0) // TODO add to SASModuleConfiguration
             .withCurrentLimit(configuration.getSteerCurrentLimit())
             .withRampRate(0.1) // This prevents the module from stuttering, TODO add to SASModuleConfiguration
             .build();

@@ -72,6 +72,11 @@ public class NeoDriveControllerFactoryBuilder {
                 checkNeoError(motor.setSmartCurrentLimit((int) currentLimit), "Failed to set current limit for NEO");
             }
 
+            if (hasRampRate()) {
+                // Configure ramp rate to help prevent stuttering
+                checkNeoError(motor.setOpenLoopRampRate(rampRate), "Failed to set NEO ramp rate");
+            }
+
             // CAN status frames
             // Status 0: Applied output/Faults/Sticky Faults/Is Follower
             checkNeoError(motor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 100), "Failed to set periodic status frame 0 rate");
