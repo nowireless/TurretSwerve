@@ -231,8 +231,17 @@ public class Drivetrain extends SubsystemBase {
    * @param desiredStates The desired SwerveModule states.
    */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
+    // Ensure all module states have achievable values
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, ModuleConstants.kMaxDriveVelocityMetersPerSecond);
 
+    // Optimize swerve module states. Prevent the swerve modules from moving farther then 90 degrees. If the direction
+    // of the motor can be inverted
+    desiredStates[0] = SwerveModuleState.optimize(desiredStates[0], new Rotation2d(m_frontLeft.getSteerAngle()));
+    desiredStates[1] = SwerveModuleState.optimize(desiredStates[1], new Rotation2d(m_frontRight.getSteerAngle()));
+    desiredStates[2] = SwerveModuleState.optimize(desiredStates[2], new Rotation2d(m_rearLeft.getSteerAngle()));
+    desiredStates[3] = SwerveModuleState.optimize(desiredStates[3], new Rotation2d(m_rearRight.getSteerAngle()));
+
+    // Send it!
     m_frontLeft.set(
         desiredStates[0].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * ModuleConstants.kDriveVoltageCompensation,
         desiredStates[0].angle.getRadians()
