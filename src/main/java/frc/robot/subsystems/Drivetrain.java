@@ -32,7 +32,8 @@ public class Drivetrain extends SubsystemBase {
 
 
   // Helpers
-  SwerveDriveOdometry m_odometry;
+  private final SwerveDriveOdometry m_odometry;
+  private final Field2d m_field = new Field2d();
 
   // Hardware
   private final Pigeon2 m_imu;
@@ -42,8 +43,6 @@ public class Drivetrain extends SubsystemBase {
   private final SwerveModule m_rearRight;
   private final List<SwerveModule> m_modules;
 
-  // TODO move into a locationization/robot state class?
-  private final Field2d m_field = new Field2d();
 
 
   public Drivetrain() {
@@ -82,49 +81,49 @@ public class Drivetrain extends SubsystemBase {
     // Similar helpers also exist for Mk4 modules using the Mk4SwerveModuleHelper class.
 
     SASModuleConfiguration moduleConfiguration = new SASModuleConfiguration();
-    moduleConfiguration.setNominalVoltage(ModuleConstants.kDriveVoltageCompensation);
+    moduleConfiguration.setNominalVoltage(DriveConstants.kDriveVoltageCompensation);
 
     m_frontLeft = SASModuleHelper.createV2(
         // Push module information to shuffle boards
         tab.getLayout("Front Left Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(0, 0),
-        new SASModuleConfiguration(),
+        moduleConfiguration,
         SASModuleHelper.GearRatio.V2,
-        ModuleConstants.kFrontLeftMotorDriveID,
-        ModuleConstants.kFrontLeftMotorSteerID,
-        ModuleConstants.kFrontLeftOffset
+        DriveConstants.kFrontLeftMotorDriveID,
+        DriveConstants.kFrontLeftMotorSteerID,
+        DriveConstants.kFrontLeftOffset
     );
 
     m_rearLeft = SASModuleHelper.createV2(
         tab.getLayout("Back Left Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(4, 0),
-        new SASModuleConfiguration(),
+        moduleConfiguration,
         SASModuleHelper.GearRatio.V2,
-        ModuleConstants.kRearLeftMotorDriveID,
-        ModuleConstants.kRearLeftMotorSteerID,
-        ModuleConstants.kRearLeftOffset
+        DriveConstants.kRearLeftMotorDriveID,
+        DriveConstants.kRearLeftMotorSteerID,
+        DriveConstants.kRearLeftOffset
     );
     m_frontRight = SASModuleHelper.createV2(
         tab.getLayout("Front Right Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(2, 0),
-        new SASModuleConfiguration(),
+        moduleConfiguration,
         SASModuleHelper.GearRatio.V2,
-        ModuleConstants.kFrontRightMotorDriveID,
-        ModuleConstants.kFrontRightMotorSteerID,
-        ModuleConstants.kFrontRightOffset
+        DriveConstants.kFrontRightMotorDriveID,
+        DriveConstants.kFrontRightMotorSteerID,
+        DriveConstants.kFrontRightOffset
     );
     m_rearRight = SASModuleHelper.createV2(
         tab.getLayout("Back Right Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(6, 0),
-        new SASModuleConfiguration(),
+        moduleConfiguration,
         SASModuleHelper.GearRatio.V2,
-        ModuleConstants.kRearRightMotorDriveID,
-        ModuleConstants.kRearRightMotorSteerID,
-        ModuleConstants.kRearRightOffset
+        DriveConstants.kRearRightMotorDriveID,
+        DriveConstants.kRearRightMotorSteerID,
+        DriveConstants.kRearRightOffset
     );
 
     m_modules = Arrays.asList(
@@ -232,7 +231,7 @@ public class Drivetrain extends SubsystemBase {
    */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     // Ensure all module states have achievable values
-    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, ModuleConstants.kMaxDriveVelocityMetersPerSecond);
+    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DriveConstants.kMaxDriveVelocityMetersPerSecond);
 
     // Optimize swerve module states. Prevent the swerve modules from moving farther then 90 degrees. If the direction
     // of the motor can be inverted
@@ -243,22 +242,22 @@ public class Drivetrain extends SubsystemBase {
 
     // Send it!
     m_frontLeft.set(
-        desiredStates[0].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * ModuleConstants.kDriveVoltageCompensation,
+        desiredStates[0].speedMetersPerSecond / DriveConstants.kMaxDriveVelocityMetersPerSecond * 12,
         desiredStates[0].angle.getRadians()
     );
 
     m_frontRight.set(
-        desiredStates[1].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * ModuleConstants.kDriveVoltageCompensation,
+        desiredStates[1].speedMetersPerSecond / DriveConstants.kMaxDriveVelocityMetersPerSecond * 12,
         desiredStates[1].angle.getRadians()
     );
 
     m_rearLeft.set(
-        desiredStates[2].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * ModuleConstants.kDriveVoltageCompensation,
+        desiredStates[2].speedMetersPerSecond / DriveConstants.kMaxDriveVelocityMetersPerSecond * 12,
         desiredStates[2].angle.getRadians()
     );
 
     m_rearRight.set(
-        desiredStates[3].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * ModuleConstants.kDriveVoltageCompensation,
+        desiredStates[3].speedMetersPerSecond / DriveConstants.kMaxDriveVelocityMetersPerSecond * 12,
         desiredStates[3].angle.getRadians()
     );
   }
