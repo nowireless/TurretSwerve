@@ -4,7 +4,8 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.sensors.Pigeon2;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.sensors.PigeonIMU;
 import com.kennedyrobotics.swerve.SASModuleConfiguration;
 import com.kennedyrobotics.swerve.SASModuleHelper;
 import com.swervedrivespecialties.swervelib.SwerveModule;
@@ -35,7 +36,7 @@ public class Drivetrain extends SubsystemBase {
   SwerveDriveOdometry m_odometry;
 
   // Hardware
-  private final Pigeon2 m_imu;
+  private final PigeonIMU m_imu;
   private final SwerveModule m_frontLeft;
   private final SwerveModule m_rearLeft;
   private final SwerveModule m_frontRight;
@@ -46,13 +47,13 @@ public class Drivetrain extends SubsystemBase {
   private final Field2d m_field = new Field2d();
 
 
-  public Drivetrain() {
+  public Drivetrain(TalonSRX pigeonIMU) {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
 
     //
     // IMU setup
     //
-    m_imu = new Pigeon2(DriveConstants.kPigeonID, DriveConstants.kPigeonCANBus.busName);
+    m_imu = new PigeonIMU(pigeonIMU);
     var imuShuffleboard = tab.getLayout("IMU", BuiltInLayouts.kList)
         .withSize(2,2)
         .withPosition(8, 0);
@@ -84,44 +85,44 @@ public class Drivetrain extends SubsystemBase {
     SASModuleConfiguration moduleConfiguration = new SASModuleConfiguration();
     moduleConfiguration.setNominalVoltage(ModuleConstants.kDriveVoltageCompensation);
 
-    m_frontLeft = SASModuleHelper.createV2(
+    m_frontLeft = SASModuleHelper.createV1(
         // Push module information to shuffle boards
         tab.getLayout("Front Left Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(0, 0),
         new SASModuleConfiguration(),
-        SASModuleHelper.GearRatio.V2,
+        SASModuleHelper.GearRatio.V1,
         ModuleConstants.kFrontLeftMotorDriveID,
         ModuleConstants.kFrontLeftMotorSteerID,
         ModuleConstants.kFrontLeftOffset
     );
 
-    m_rearLeft = SASModuleHelper.createV2(
+    m_rearLeft = SASModuleHelper.createV1(
         tab.getLayout("Back Left Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(4, 0),
         new SASModuleConfiguration(),
-        SASModuleHelper.GearRatio.V2,
+        SASModuleHelper.GearRatio.V1,
         ModuleConstants.kRearLeftMotorDriveID,
         ModuleConstants.kRearLeftMotorSteerID,
         ModuleConstants.kRearLeftOffset
     );
-    m_frontRight = SASModuleHelper.createV2(
+    m_frontRight = SASModuleHelper.createV1(
         tab.getLayout("Front Right Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(2, 0),
         new SASModuleConfiguration(),
-        SASModuleHelper.GearRatio.V2,
+        SASModuleHelper.GearRatio.V1,
         ModuleConstants.kFrontRightMotorDriveID,
         ModuleConstants.kFrontRightMotorSteerID,
         ModuleConstants.kFrontRightOffset
     );
-    m_rearRight = SASModuleHelper.createV2(
+    m_rearRight = SASModuleHelper.createV1(
         tab.getLayout("Back Right Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(6, 0),
         new SASModuleConfiguration(),
-        SASModuleHelper.GearRatio.V2,
+        SASModuleHelper.GearRatio.V1,
         ModuleConstants.kRearRightMotorDriveID,
         ModuleConstants.kRearRightMotorSteerID,
         ModuleConstants.kRearRightOffset

@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.kennedyrobotics.triggers.DPadTrigger;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,12 +20,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.DriveWithController;
+import frc.robot.commands.MoveElevatorCommand;
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.ShooterHood;
-import frc.robot.subsystems.Turret;
-import frc.robot.subsystems.Vision;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Elevator;
 
 import java.util.List;
 
@@ -40,11 +40,9 @@ public class RobotContainer {
   private final XboxController m_controller = new XboxController(0);
 
   // The robot's subsystems and commands are defined here...
-  private final Drivetrain m_drivetrain = new Drivetrain();
-  private final Shooter m_shooter = new Shooter();
-  private final ShooterHood m_shooterHood = new ShooterHood();
-  private final Vision m_vision = new Vision(); 
-  private final Turret m_turret = new Turret();
+  private final TalonSRX m_talonSRXImu = new TalonSRX(DriveConstants.kPigeonTalonSRXID);
+  private final Drivetrain m_drivetrain = new Drivetrain(m_talonSRXImu);
+  private final Elevator m_elevator = new Elevator(() -> false);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -65,6 +63,12 @@ public class RobotContainer {
   private void configureButtonBindings() {
     new JoystickButton(m_controller, XboxController.Button.kStart.value)
         .whenPressed(new InstantCommand(m_drivetrain::zeroHeading)); // TODO this should also do something with odometry? As it freaks out
+
+    new DPadTrigger(m_controller, DPadTrigger.DPad.kUp)
+        .whileActiveContinuous(new MoveElevatorCommand(m_elevator, 0.15));
+
+    new DPadTrigger(m_controller, DPadTrigger.DPad.KDown)
+        .whileActiveContinuous(new MoveElevatorCommand(m_elevator, -0.1));
   }
 
   /**

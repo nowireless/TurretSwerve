@@ -39,7 +39,7 @@ public final class Constants {
         //
         public static final double kWheelDiameterMeters = Units.inchesToMeters(4);
 
-        public static final double kDriveGearReduction = SASModuleHelper.GearRatio.V2.getConfiguration().getDriveReduction();
+        public static final double kDriveGearReduction = SASModuleHelper.GearRatio.V1.getConfiguration().getDriveReduction();
 
         public static final double kDriveVoltageCompensation = 10;
 
@@ -52,21 +52,21 @@ public final class Constants {
         //
         // Individual module configuration
         //
-        public static final int kFrontLeftMotorDriveID = 10;
-        public static final int kFrontLeftMotorSteerID = 11;
-        public static final Rotation2d kFrontLeftOffset = Rotation2d.fromDegrees(-64);
+        public static final int kFrontLeftMotorDriveID = 34;
+        public static final int kFrontLeftMotorSteerID = 34;
+        public static final Rotation2d kFrontLeftOffset = Rotation2d.fromDegrees(99);
 
-        public static final int kRearLeftMotorDriveID = 12;
-        public static final int kRearLeftMotorSteerID = 13;
-        public static final Rotation2d kRearLeftOffset = Rotation2d.fromDegrees(70);
+        public static final int kRearLeftMotorDriveID = 33;
+        public static final int kRearLeftMotorSteerID = 33;
+        public static final Rotation2d kRearLeftOffset = Rotation2d.fromDegrees(-100);
 
-        public static final int kFrontRightMotorDriveID = 14;
-        public static final int kFrontRightMotorSteerID = 15;
-        public static final Rotation2d kFrontRightOffset = Rotation2d.fromDegrees(-139);
+        public static final int kFrontRightMotorDriveID = 32;
+        public static final int kFrontRightMotorSteerID = 32;
+        public static final Rotation2d kFrontRightOffset = Rotation2d.fromDegrees(-30.5);
 
-        public static final int kRearRightMotorDriveID = 16;
-        public static final int kRearRightMotorSteerID = 17;
-        public static final Rotation2d kRearRightOffset = Rotation2d.fromDegrees(-65);
+        public static final int kRearRightMotorDriveID = 31;
+        public static final int kRearRightMotorSteerID = 31;
+        public static final Rotation2d kRearRightOffset = Rotation2d.fromDegrees(-117);
     }
 
     public static class DriveConstants {
@@ -78,7 +78,7 @@ public final class Constants {
         public static final double kWheelBaseLengthMeters = Units.inchesToMeters(21.5);
 
         // Distance between centers of right and left wheels on robot
-        public static final double kTrackWidthMeters = Units.inchesToMeters(26);
+        public static final double kTrackWidthMeters = Units.inchesToMeters(24);
 
         /**
          * The maximum angular velocity of the robot in radians per second.
@@ -100,8 +100,19 @@ public final class Constants {
         //
         // CAN BUS IDS
         //
-        public static final int kPigeonID = 0;
-        public static final CANBus kPigeonCANBus = CANBus.kCANivore;
+        public static final int kPigeonTalonSRXID = 20;
+        public static final boolean kPigeonUpsideDown = true;
+    }
+
+    public static final class ElevatorConstants {
+        public static final double kIntakeHeightOffset = 0;
+
+        // CAN IDs
+        public static final int kMotorLeaderID = 10;
+        public static final int kMotorFollowerID = 11;
+
+        // PCM
+        public static final int kSolenoidLiftBrakeChannel = 0;
     }
 
     public static final class AutoConstants {
