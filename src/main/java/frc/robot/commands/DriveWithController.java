@@ -73,6 +73,13 @@ public class DriveWithController extends CommandBase {
         yMove = MathUtil.applyDeadband(yMove, kDeadband);
         rotate = MathUtil.applyDeadband(rotate, kDeadband);
 
+        // Check to for changes between robot and field centric drive modes
+        if (controller.getAButton()) {
+            fieldOrient = false;
+        } else if (controller.getBButton()) {
+            fieldOrient = true;
+        }
+
         // Determine if the robot should be moving,
         boolean moving = xMove != 0 || yMove != 0 || rotate != 0;
 
@@ -94,12 +101,6 @@ public class DriveWithController extends CommandBase {
             xMove *= 0.8;
             yMove *= 0.8;
             rotate *= 0.5;
-
-            if (controller.getAButton()) {
-                fieldOrient = false;
-            } else if (controller.getBButton()) {
-                fieldOrient = true;
-            }
 
             // Now we need to map the percentages to Meters (or Radians) per second, as that is what the drive train
             // subsystem accepts

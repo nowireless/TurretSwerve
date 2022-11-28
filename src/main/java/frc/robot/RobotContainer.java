@@ -64,7 +64,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     new JoystickButton(m_controller, XboxController.Button.kStart.value)
-        .whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
+        .whenPressed(new InstantCommand(m_drivetrain::zeroHeading)); // TODO this should also do something with odometry? As it freaks out
   }
 
   /**
