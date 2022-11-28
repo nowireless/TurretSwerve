@@ -102,6 +102,7 @@ public final class Constants {
         //
         public static final int kPigeonID = 0;
         public static final CANBus kPigeonCANBus = CANBus.kCANivore;
+        public static final boolean kPigeonUpsideDown = false;
     }
 
     public static final class AutoConstants {
