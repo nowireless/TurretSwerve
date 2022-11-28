@@ -19,10 +19,6 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.DriveWithController;
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.ShooterHood;
-import frc.robot.subsystems.Turret;
-import frc.robot.subsystems.Vision;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import java.util.List;
@@ -41,10 +37,6 @@ public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
   private final Drivetrain m_drivetrain = new Drivetrain();
-  private final Shooter m_shooter = new Shooter();
-  private final ShooterHood m_shooterHood = new ShooterHood();
-  private final Vision m_vision = new Vision(); 
-  private final Turret m_turret = new Turret();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

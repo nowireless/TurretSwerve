@@ -5,8 +5,8 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.Pigeon2;
-import com.kennedyrobotics.swerve.SASModuleConfiguration;
-import com.kennedyrobotics.swerve.SASModuleHelper;
+import com.swervedrivespecialties.swervelib.Mk4ModuleConfiguration;
+import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -47,12 +47,11 @@ public class Drivetrain extends SubsystemBase {
 
 
   public Drivetrain() {
-    ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
-
     //
     // IMU setup
     //
     m_imu = new Pigeon2(DriveConstants.kPigeonID, DriveConstants.kPigeonCANBus.busName);
+    ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
     var imuShuffleboard = tab.getLayout("IMU", BuiltInLayouts.kList)
         .withSize(2,2)
         .withPosition(8, 0);
@@ -81,50 +80,56 @@ public class Drivetrain extends SubsystemBase {
     //
     // Similar helpers also exist for Mk4 modules using the Mk4SwerveModuleHelper class.
 
-    SASModuleConfiguration moduleConfiguration = new SASModuleConfiguration();
+    Mk4ModuleConfiguration moduleConfiguration = new Mk4ModuleConfiguration();
     moduleConfiguration.setNominalVoltage(ModuleConstants.kDriveVoltageCompensation);
 
-    m_frontLeft = SASModuleHelper.createV2(
+    m_frontLeft = Mk4SwerveModuleHelper.createNeo(
         // Push module information to shuffle boards
         tab.getLayout("Front Left Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(0, 0),
-        new SASModuleConfiguration(),
-        SASModuleHelper.GearRatio.V2,
+        moduleConfiguration,
+        Mk4SwerveModuleHelper.GearRatio.L2,
         ModuleConstants.kFrontLeftMotorDriveID,
         ModuleConstants.kFrontLeftMotorSteerID,
-        ModuleConstants.kFrontLeftOffset
+        ModuleConstants.kFrontLeftEncoderID,
+        ModuleConstants.kFrontLeftOffset.getRadians()
     );
 
-    m_rearLeft = SASModuleHelper.createV2(
+    m_rearLeft = Mk4SwerveModuleHelper.createNeo(
         tab.getLayout("Back Left Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(4, 0),
-        new SASModuleConfiguration(),
-        SASModuleHelper.GearRatio.V2,
+        moduleConfiguration,
+        Mk4SwerveModuleHelper.GearRatio.L2,
         ModuleConstants.kRearLeftMotorDriveID,
         ModuleConstants.kRearLeftMotorSteerID,
-        ModuleConstants.kRearLeftOffset
+        ModuleConstants.kRearLeftEncoderID,
+        ModuleConstants.kRearLeftOffset.getRadians()
     );
-    m_frontRight = SASModuleHelper.createV2(
+
+    m_frontRight = Mk4SwerveModuleHelper.createNeo(
         tab.getLayout("Front Right Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(2, 0),
-        new SASModuleConfiguration(),
-        SASModuleHelper.GearRatio.V2,
+        moduleConfiguration,
+        Mk4SwerveModuleHelper.GearRatio.L2,
         ModuleConstants.kFrontRightMotorDriveID,
         ModuleConstants.kFrontRightMotorSteerID,
-        ModuleConstants.kFrontRightOffset
+        ModuleConstants.kFrontRightEncoderID,
+        ModuleConstants.kFrontRightOffset.getRadians()
     );
-    m_rearRight = SASModuleHelper.createV2(
+
+    m_rearRight = Mk4SwerveModuleHelper.createNeo(
         tab.getLayout("Back Right Module", BuiltInLayouts.kList)
             .withSize(2, 6)
             .withPosition(6, 0),
-        new SASModuleConfiguration(),
-        SASModuleHelper.GearRatio.V2,
+        moduleConfiguration,
+        Mk4SwerveModuleHelper.GearRatio.L2,
         ModuleConstants.kRearRightMotorDriveID,
         ModuleConstants.kRearRightMotorSteerID,
-        ModuleConstants.kRearRightOffset
+        ModuleConstants.kRearRightEncoderID,
+        ModuleConstants.kRearRightOffset.getRadians()
     );
 
     m_modules = Arrays.asList(
@@ -179,6 +184,7 @@ public class Drivetrain extends SubsystemBase {
    *
    * @return The pose.
    */
+  // ODOMETRY
   public Pose2d getPose() {
     return m_odometry.getPoseMeters();
   }
@@ -188,6 +194,7 @@ public class Drivetrain extends SubsystemBase {
    *
    * @param pose The pose to which to set the odometry.
    */
+  // ODOMETRY
   public void resetOdometry(Pose2d pose) {
     m_odometry.resetPosition(pose, getHeading());
   }
@@ -234,26 +241,27 @@ public class Drivetrain extends SubsystemBase {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, ModuleConstants.kMaxDriveVelocityMetersPerSecond);
 
     m_frontLeft.set(
-        desiredStates[0].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * ModuleConstants.kDriveVoltageCompensation,
+        desiredStates[0].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * 12,
         desiredStates[0].angle.getRadians()
     );
 
     m_frontRight.set(
-        desiredStates[1].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * ModuleConstants.kDriveVoltageCompensation,
+        desiredStates[1].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * 12,
         desiredStates[1].angle.getRadians()
     );
 
     m_rearLeft.set(
-        desiredStates[2].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * ModuleConstants.kDriveVoltageCompensation,
+        desiredStates[2].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * 12,
         desiredStates[2].angle.getRadians()
     );
 
     m_rearRight.set(
-        desiredStates[3].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * ModuleConstants.kDriveVoltageCompensation,
+        desiredStates[3].speedMetersPerSecond / ModuleConstants.kMaxDriveVelocityMetersPerSecond * 12,
         desiredStates[3].angle.getRadians()
     );
   }
 
+  // ODOMETRY
   public SwerveModuleState[] getModuleStates() {
     // Note the order of modules needs to match the order provided to DriveConstants.kDriveKinematics
     return new SwerveModuleState[]{

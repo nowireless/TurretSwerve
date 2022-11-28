@@ -44,28 +44,32 @@ public final class Constants {
         public static final double kDriveVoltageCompensation = 10;
 
 
-        //  FreeSpeed Radians   1 Rotation                     kWheelDiameter Meters   FreeSpeed * kGearReduction * kWheelDiameter Meters
-        //  ----------------- * ----------- * kGearReduction * --------------------- = --------------------------------------------------
-        //  1 Second            2PI Radians                    1 Rotation              2PI Second
-        public static final double kMaxDriveVelocityMetersPerSecond = DCMotor.getNEO(1).freeSpeedRadPerSec / (2*Math.PI) * kDriveGearReduction * kWheelDiameterMeters;
+        //  FreeSpeed Radians   1 Rotation                     kWheelDiameter Meters   Voltage Nominal   FreeSpeed * kGearReduction * kWheelDiameter Meters
+        //  ----------------- * ----------- * kGearReduction * --------------------- * --------------- = --------------------------------------------------
+        //  1 Second            2PI Radians                    1 Rotation              Voltage Max       2PI Second
+        public static final double kMaxDriveVelocityMetersPerSecond = DCMotor.getNEO(1).freeSpeedRadPerSec / (2*Math.PI) * kDriveGearReduction * kWheelDiameterMeters * (kDriveVoltageCompensation/12.0);
 
         //
         // Individual module configuration
         //
         public static final int kFrontLeftMotorDriveID = 10;
         public static final int kFrontLeftMotorSteerID = 11;
+        public static final int kFrontLeftEncoderID = 11;
         public static final Rotation2d kFrontLeftOffset = Rotation2d.fromDegrees(-64);
 
         public static final int kRearLeftMotorDriveID = 12;
         public static final int kRearLeftMotorSteerID = 13;
+        public static final int kRearLeftEncoderID = 13;
         public static final Rotation2d kRearLeftOffset = Rotation2d.fromDegrees(70);
 
         public static final int kFrontRightMotorDriveID = 14;
         public static final int kFrontRightMotorSteerID = 15;
+        public static final int kFrontRightEncoderID = 15;
         public static final Rotation2d kFrontRightOffset = Rotation2d.fromDegrees(-139);
 
         public static final int kRearRightMotorDriveID = 16;
         public static final int kRearRightMotorSteerID = 17;
+        public static final int kRearRightEncoderID = 17;
         public static final Rotation2d kRearRightOffset = Rotation2d.fromDegrees(-65);
     }
 
