@@ -29,7 +29,7 @@ public class Turret extends SubsystemBase {
 
   public static class DataPoint {
     public double voltage;
-    public double rotations;
+    public double motorAngle;
   }
 
   public enum Fault {
@@ -120,7 +120,7 @@ public class Turret extends SubsystemBase {
     ObjectMapper objectMapper = new ObjectMapper();
     DataPoint[] dataPoints;
     try {
-      File file = Paths.get(Filesystem.getDeployDirectory() + "/turret-pot-voltage-rotations.json").toFile();
+      File file = Paths.get(Filesystem.getDeployDirectory() + "/turrent-encoder-data-processed.json").toFile();
       dataPoints = objectMapper.readValue(file, DataPoint[].class);
     } catch (IOException e) {
       DriverStation.reportError("Failed to read turret-pot-voltage-rotations.json", true);
@@ -128,10 +128,10 @@ public class Turret extends SubsystemBase {
     }
 
     for (var dataPoint : dataPoints) {
-      System.out.println("Voltage: " + dataPoint.voltage+ ", Rotations: " + dataPoint.rotations);
+      System.out.println("Voltage: " + dataPoint.voltage+ ", MotorAngle: " + dataPoint.motorAngle);
       m_potVoltageRotationMap.put(
         new InterpolatingDouble(dataPoint.voltage),
-        new InterpolatingDouble(dataPoint.rotations)
+        new InterpolatingDouble(dataPoint.motorAngle)
       );
     }
 
@@ -144,9 +144,9 @@ public class Turret extends SubsystemBase {
       faults.add(Fault.kPotentiometerDisconnected);
     }
 
-    if (getPotentiometerRotations() == null) {
-      faults.add(Fault.kPotentiometerOutOfRange);
-    }
+//    if (getPotentiometerRotations() == null) {
+//      faults.add(Fault.kPotentiometerOutOfRange);
+//    }
 
     return faults;
   }
@@ -170,29 +170,34 @@ public class Turret extends SubsystemBase {
     return getPotentiometerAngle();
   }
 
-  /**
-   *
-   * @return rotations or null if the potentimaters voltage is out of range;
-   */
-  public InterpolatingDouble getPotentiometerRotations() {
-    return m_potVoltageRotationMap.getInterpolated(
-        new InterpolatingDouble(m_potentiometer.getVoltage())
-    );
-  }
+//  /**
+//   *
+//   * @return rotations or null if the potentimaters voltage is out of range;
+//   */
+//  public InterpolatingDouble getPotentiometerRotations() {
+//    return m_potVoltageRotationMap.getInterpolated(
+//        new InterpolatingDouble(m_potentiometer.getVoltage())
+//    );
+//  }
 
   public Rotation2d getPotentiometerAngle() {
-     //             16 Pot Gear       360 degrees               16*360 Degrees
-     // Rotations * --------------- * ----------- = Rotations * -----------------
-     //             140 Turret gear   1 Rotation                140   Rotations
+//     //             16 Pot Gear       360 degrees               16*360 Degrees
+//     // Rotations * --------------- * ----------- = Rotations * -----------------
+//     //             140 Turret gear   1 Rotation                140   Rotations
+//
+//
+//    InterpolatingDouble rotations = getPotentiometerRotations();
+//    if (rotations == null) {
+//      return new Rotation2d(); // IDK ideally if this happens the turret will have disabled itself...
+//    }
+//
+//
+//    return Rotation2d.fromDegrees(rotations.value * (16.0/140.0) * 360.0).plus(TurretConstants.kOffset);
 
-
-    InterpolatingDouble rotations = getPotentiometerRotations();
-    if (rotations == null) {
-      return new Rotation2d(); // IDK ideally if this happens the turret will have disabled itself...
-    }
-
-
-    return Rotation2d.fromDegrees(rotations.value * (16.0/140.0) * 360.0).plus(TurretConstants.kOffset);
+    // TODO handle outof bounds gracefully...
+    return Rotation2d.fromDegrees(m_potVoltageRotationMap.getInterpolated(
+        new InterpolatingDouble(m_potentiometer.getVoltage())
+    ).value);
   }
 
   public double getPotentiometerVoltage() {
