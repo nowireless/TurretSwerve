@@ -5,6 +5,8 @@
 package frc.robot;
 
 import com.kennedyrobotics.swerve.SASModuleHelper;
+import com.team254.lib.util.InterpolatingDouble;
+import com.team254.lib.util.InterpolatingTreeMap;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -98,6 +100,12 @@ public final class Constants {
         public static final int kRearRightMotorDriveID = 16;
         public static final int kRearRightMotorSteerID = 17;
         public static final Rotation2d kRearRightOffset = Rotation2d.fromDegrees(-65);
+    }
+
+    public static final class TurretConstants {
+        public static final int kMotorID = 20;
+        public static final Rotation2d kOffset = Rotation2d.fromDegrees(161);
+
     }
 
     public static final class AutoConstants {
