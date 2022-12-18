@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.DriveWithController;
-import frc.robot.commands.TurretPotCalibrationCommand;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterHood;
@@ -57,8 +56,6 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
-
-    SmartDashboard.putData("Turret Calibrate", new TurretPotCalibrationCommand(m_turret));
   }
 
   /**
@@ -85,11 +82,9 @@ public class RobotContainer {
   }
 
   public void onTeleopInit() {
-    m_turret.syncMotorEncoder();
   }
 
   public void onAutonomousInit() {
-    m_turret.syncMotorEncoder();
   }
 
   /**

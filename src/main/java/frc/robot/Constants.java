@@ -104,7 +104,8 @@ public final class Constants {
 
     public static final class TurretConstants {
         public static final int kMotorID = 20;
-        public static final Rotation2d kOffset = Rotation2d.fromDegrees(161);
+        public static final int kEncoderID = 20;
+        public static final Rotation2d kOffset = Rotation2d.fromDegrees(-23.2);
 
     }
 
