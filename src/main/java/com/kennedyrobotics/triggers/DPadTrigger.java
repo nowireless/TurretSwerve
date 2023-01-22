@@ -12,38 +12,31 @@ public class DPadTrigger extends Trigger {
     kRight
   }
 
-  private final DPad dpad_;
-  private final XboxController controller_;
-
   public DPadTrigger(XboxController controller, DPad dpad) {
-    dpad_ = dpad;
-    controller_ = controller;
-  }
+    super(() -> {
 
-  @Override
-  public boolean get() {
+      int pov = controller.getPOV();
 
-    int pov = controller_.getPOV();
+      DPad current;
 
-    DPad current;
+      switch (pov) {
+        case 0:
+          current = DPad.kUp;
+          break;
+        case 90:
+          current = DPad.kRight;
+          break;
+        case 180:
+          current = DPad.KDown;
+          break;
+        case 270:
+          current = DPad.KLeft;
+          break;
+        default:
+          return false;
+      }
 
-    switch (pov) {
-    case 0:
-      current = DPad.kUp;
-      break;
-    case 90:
-      current = DPad.kRight;
-      break;
-    case 180:
-      current = DPad.KDown;
-      break;
-    case 270:
-      current = DPad.KLeft;
-      break;
-    default:
-      return false;
-    }
-
-    return dpad_ == current;
+      return dpad == current;
+    });
   }
 }

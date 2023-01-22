@@ -142,7 +142,7 @@ public class AutoSelector implements Runnable {
      */
     private synchronized void updateSelectedAuto() {
         Auto auto = selectedAuto();
-        Preferences.putString(kPreferenceKey, auto.id);
+        Preferences.setString(kPreferenceKey, auto.id);
         SmartDashboard.putString("Selected Auto", auto.id);
     }
 

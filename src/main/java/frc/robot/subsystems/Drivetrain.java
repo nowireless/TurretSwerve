@@ -10,10 +10,7 @@ import com.kennedyrobotics.swerve.SASModuleHelper;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -134,7 +131,7 @@ public class Drivetrain extends SubsystemBase {
     );
 
     // Odometry class for tracking robot pose
-    m_odometry = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, getHeading());
+    m_odometry = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, getHeading(), getModulePositions());
 
     tab.add("Field", m_field)
         .withSize(5, 4)
@@ -188,7 +185,7 @@ public class Drivetrain extends SubsystemBase {
    * @param pose The pose to which to set the odometry.
    */
   public void resetOdometry(Pose2d pose) {
-    m_odometry.resetPosition(pose, getHeading());
+    m_odometry.resetPosition(getHeading(), getModulePositions(), pose);
   }
 
   /**
@@ -265,10 +262,20 @@ public class Drivetrain extends SubsystemBase {
   public SwerveModuleState[] getModuleStates() {
     // Note the order of modules needs to match the order provided to DriveConstants.kDriveKinematics
     return new SwerveModuleState[]{
-        new SwerveModuleState(m_frontLeft.getDriveVelocity(), new Rotation2d(m_frontLeft.getSteerAngle())),
-        new SwerveModuleState(m_frontRight.getDriveVelocity(), new Rotation2d(m_frontRight.getSteerAngle())),
-        new SwerveModuleState(m_rearLeft.getDriveVelocity(), new Rotation2d(m_rearLeft.getSteerAngle())),
-        new SwerveModuleState(m_rearRight.getDriveVelocity(), new Rotation2d(m_rearRight.getSteerAngle()))
+      m_frontLeft.getState(),
+      m_frontRight.getState(),
+      m_rearLeft.getState(),
+      m_rearRight.getState(),
+    };
+  }
+
+  public SwerveModulePosition[] getModulePositions() {
+    // Note the order of modules needs to match the order provided to DriveConstants.kDriveKinematics
+    return new SwerveModulePosition[]{
+      m_frontLeft.getPosition(),
+      m_frontRight.getPosition(),
+      m_rearLeft.getPosition(),
+      m_rearRight.getPosition(),
     };
   }
 
@@ -285,10 +292,7 @@ public class Drivetrain extends SubsystemBase {
     SwerveModuleState[] moduleStates = getModuleStates();
     m_odometry.update(
         getHeading(),
-        moduleStates[0],
-        moduleStates[1],
-        moduleStates[2],
-        moduleStates[3]
+        getModulePositions()
     );
 
     m_field.setRobotPose(m_odometry.getPoseMeters());

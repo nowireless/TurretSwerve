@@ -1,11 +1,11 @@
 package com.kennedyrobotics.swerve;
 
-import com.swervedrivespecialties.swervelib.ModuleConfiguration;
+import com.swervedrivespecialties.swervelib.MechanicalConfiguration;
 import edu.wpi.first.math.util.Units;
 
 public class SASModuleConfigurations {
 
-    public static final ModuleConfiguration V1 = new ModuleConfiguration(
+    public static final MechanicalConfiguration V1 = new MechanicalConfiguration(
         Units.inchesToMeters(4),
         (12.0 / 40.0) * (20.0/40.0),
         true,
@@ -13,7 +13,7 @@ public class SASModuleConfigurations {
         false
     );
 
-    public static final ModuleConfiguration V2 = new ModuleConfiguration(
+    public static final MechanicalConfiguration V2 = new MechanicalConfiguration(
         Units.inchesToMeters(4),
         (12.0 / 40.0) * (20.0/40.0),
         true,
