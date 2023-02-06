@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
+import edu.wpi.first.math.filter.SlewRateLimiter;
+
 
 import static frc.robot.Constants.*;
 
@@ -21,6 +23,9 @@ public class DriveWithController extends CommandBase {
     private boolean fieldOrient;
     private boolean lastMovingState = false;
     private SwerveModuleState[] latchedModuleStates;
+    private final SlewRateLimiter xFilter = new SlewRateLimiter(5);
+    private final SlewRateLimiter yFilter = new SlewRateLimiter(5);
+    private final SlewRateLimiter rotateFilter = new SlewRateLimiter(5);
 
     // Keep track of the last 5 module angles
     private static final int kAngleHistoryMilliseconds = 100;
@@ -67,6 +72,11 @@ public class DriveWithController extends CommandBase {
         } else {
             rotate =  left;
         }
+
+        //Apply filter
+        xMove = xFilter.calculate(xMove);
+        yMove = yFilter.calculate(yMove);
+        rotate = rotateFilter.calculate(rotate);
 
         // Apply deadband
         xMove = MathUtil.applyDeadband(xMove, kDeadband);
