@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.DriveWithController;
@@ -28,7 +30,18 @@ import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.Vision;
 import edu.wpi.first.wpilibj2.command.Command;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import com.kennedyrobotics.auto.AutoSelector;
+import com.kennedyrobotics.hardware.misc.RevDigit;
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
+import com.pathplanner.lib.server.PathPlannerServer;
 
 import static frc.robot.Constants.*;
 
@@ -47,7 +60,11 @@ public class RobotContainer {
   private final Shooter m_shooter = new Shooter();
   private final ShooterHood m_shooterHood = new ShooterHood();
   private final Vision m_vision = new Vision(); 
-  private final Turret m_turret = new Turret();
+  // private final Turret m_turret = new Turret();
+
+  //Auto
+  private final RevDigit m_revDigit;
+  private final AutoSelector m_autoSelector;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -58,7 +75,23 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
-    SmartDashboard.putData("Turret Calibrate", new TurretPotCalibrationCommand(m_turret));
+    // SmartDashboard.putData("Turret Calibrate", new TurretPotCalibrationCommand(m_turret));
+
+    // Path planner stuff
+    PathPlannerServer.startServer(5811);
+
+    // Auto selector
+    m_revDigit = new RevDigit();
+    m_revDigit.display("Ryan");
+    m_autoSelector = new AutoSelector(m_revDigit, "DFLT", new SequentialCommandGroup(
+      new PrintCommand("Hi")
+    ));
+
+    // Initialize other autos here
+    m_autoSelector.registerCommand("WPILibSwerveExample", "WPIS", makeWPILibSwerveExample());
+    m_autoSelector.registerCommand("PathPlannerExample", "PPLE", makePathPlannerExample());
+
+    m_autoSelector.initialize();
   }
 
   /**
@@ -71,25 +104,25 @@ public class RobotContainer {
     new JoystickButton(m_controller, XboxController.Button.kStart.value)
         .whenPressed(new InstantCommand(m_drivetrain::zeroHeading)); // TODO this should also do something with odometry? As it freaks out
 
-    new JoystickButton(m_controller, XboxController.Button.kA.value)
-        .whileHeld(new FunctionalCommand(
-            () -> {},
-            () -> {
-              double power = m_controller.getRightX();
-              m_turret.setPower(Math.copySign(power * power, power));
-            },
-            (interrupted) -> m_turret.setPower(0),
-            () -> false,
-            m_turret
-        ));
+    // new JoystickButton(m_controller, XboxController.Button.kA.value)
+    //     .whileHeld(new FunctionalCommand(
+    //         () -> {},
+    //         () -> {
+    //           double power = m_controller.getRightX();
+    //           m_turret.setPower(Math.copySign(power * power, power));
+    //         },
+    //         (interrupted) -> m_turret.setPower(0),
+    //         () -> false,
+    //         m_turret
+    //     ));
   }
 
   public void onTeleopInit() {
-    m_turret.syncMotorEncoder();
+    // m_turret.syncMotorEncoder();
   }
 
   public void onAutonomousInit() {
-    m_turret.syncMotorEncoder();
+    // m_turret.syncMotorEncoder();
   }
 
   /**
@@ -98,6 +131,13 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    return m_autoSelector.selected();
+  }
+
+  //
+  // Autontous modes below
+  //
+  public Command makeWPILibSwerveExample() {
     // Create config for trajectory
     TrajectoryConfig config =
         new TrajectoryConfig(
@@ -140,5 +180,32 @@ public class RobotContainer {
 
     // Run path following command, then stop at the end.
     return swerveControllerCommand.andThen(() -> m_drivetrain.drive(0, 0, 0, false));
+  }
+
+  public Command makePathPlannerExample() {
+    // This will load the file "FullAuto.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
+    // for every path in the group
+    List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup("FullAuto", new PathConstraints(4, 3));
+
+    // This is just an example event map. It would be better to have a constant, global event map
+    // in your code that will be used by all path following commands.
+    HashMap<String, Command> eventMap = new HashMap<>();
+    eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+    eventMap.put("intakeDown", new PrintCommand("Intake Down!"));
+
+    // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
+    SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
+      m_drivetrain::getPose, // Pose2d supplier
+      m_drivetrain::resetOdometry, // Pose2d consumer, used to reset odometry at the beginning of auto
+      Constants.DriveConstants.kDriveKinematics, // SwerveDriveKinematics
+      new PIDConstants(5.0, 0.0, 0.0), // PID constants to correct for translation error (used to create the X and Y PID controllers)
+      new PIDConstants(0.5, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
+      m_drivetrain::setModuleStates, // Module states consumer used to output to the drive subsystem
+      eventMap,
+      true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+      m_drivetrain // The drive subsystem. Used to properly set the requirements of path following commands
+    );
+
+    return autoBuilder.fullAuto(pathGroup);
   }
 }
