@@ -4,9 +4,14 @@
 
 package frc.robot.subsystems;
 
+import com.kennedyrobotics.hardware.vision.Limelight;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Vision extends SubsystemBase {
+
+  private final Limelight m_limelight = new Limelight();
+  public Limelight getLimelight() { return m_limelight; }
+
   /** Creates a new ExampleSubsystem. */
   public Vision() {}
 

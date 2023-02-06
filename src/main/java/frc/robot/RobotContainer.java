@@ -14,15 +14,13 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.DriveWithController;
-import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.ShooterHood;
-import frc.robot.subsystems.Turret;
-import frc.robot.subsystems.Vision;
+import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import java.util.List;
@@ -40,6 +38,7 @@ public class RobotContainer {
   private final XboxController m_controller = new XboxController(0);
 
   // The robot's subsystems and commands are defined here...
+  private final Power m_power = new Power();
   private final Drivetrain m_drivetrain = new Drivetrain();
   private final Shooter m_shooter = new Shooter();
   private final ShooterHood m_shooterHood = new ShooterHood();
@@ -65,6 +64,24 @@ public class RobotContainer {
   private void configureButtonBindings() {
     new JoystickButton(m_controller, XboxController.Button.kStart.value)
         .whenPressed(new InstantCommand(m_drivetrain::zeroHeading)); // TODO this should also do something with odometry? As it freaks out
+
+    new JoystickButton(m_controller, XboxController.Button.kA.value)
+        .whileHeld(new FunctionalCommand(
+            () -> {},
+            () -> {
+              double power = m_controller.getRightX();
+              m_turret.setPower(Math.copySign(power * power, power));
+            },
+            (interrupted) -> m_turret.setPower(0),
+            () -> false,
+            m_turret
+        ));
+  }
+
+  public void onTeleopInit() {
+  }
+
+  public void onAutonomousInit() {
   }
 
   /**

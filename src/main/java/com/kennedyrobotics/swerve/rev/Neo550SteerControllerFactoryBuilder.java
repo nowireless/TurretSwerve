@@ -129,7 +129,7 @@ public class Neo550SteerControllerFactoryBuilder {
             // Status 2: Motor Position
             checkNeoError(motor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 20), "Failed to set periodic status frame 2 rate");
             // Status 3: Analog Sensor Voltage/Analog Sensor Velocity/Analog Sensor Position
-            checkNeoError(motor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus3, 10), "Failed to set periodic status frame 3 rate");
+            checkNeoError(motor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus3, 20), "Failed to set periodic status frame 3 rate");
 
             //
             // PID controller

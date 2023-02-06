@@ -1,0 +1,326 @@
+[
+  {
+    "voltage": "0.00390625",
+    "rotations": "0"
+  },
+  {
+    "voltage": "0.04296875",
+    "rotations": "0.125"
+  },
+  {
+    "voltage": "0.0859375",
+    "rotations": "0.25"
+  },
+  {
+    "voltage": "0.12890625",
+    "rotations": "0.375"
+  },
+  {
+    "voltage": "0.171875",
+    "rotations": "0.5"
+  },
+  {
+    "voltage": "0.2109375",
+    "rotations": "0.625"
+  },
+  {
+    "voltage": "0.25390625",
+    "rotations": "0.75"
+  },
+  {
+    "voltage": "0.29296875",
+    "rotations": "0.875"
+  },
+  {
+    "voltage": "0.3359375",
+    "rotations": "1"
+  },
+  {
+    "voltage": "0.375",
+    "rotations": "1.125"
+  },
+  {
+    "voltage": "0.41796875",
+    "rotations": "1.25"
+  },
+  {
+    "voltage": "0.45703125",
+    "rotations": "1.375"
+  },
+  {
+    "voltage": "0.5",
+    "rotations": "1.5"
+  },
+  {
+    "voltage": "0.5390625",
+    "rotations": "1.625"
+  },
+  {
+    "voltage": "0.58203125",
+    "rotations": "1.75"
+  },
+  {
+    "voltage": "0.62109375",
+    "rotations": "1.875"
+  },
+  {
+    "voltage": "0.66015625",
+    "rotations": "2"
+  },
+  {
+    "voltage": "0.703125",
+    "rotations": "2.125"
+  },
+  {
+    "voltage": "0.7421875",
+    "rotations": "2.25"
+  },
+  {
+    "voltage": "0.78125",
+    "rotations": "2.375"
+  },
+  {
+    "voltage": "0.8203125",
+    "rotations": "2.5"
+  },
+  {
+    "voltage": "0.86328125",
+    "rotations": "2.625"
+  },
+  {
+    "voltage": "0.90234375",
+    "rotations": "2.75"
+  },
+  {
+    "voltage": "0.9453125",
+    "rotations": "2.875"
+  },
+  {
+    "voltage": "0.984375",
+    "rotations": "3"
+  },
+  {
+    "voltage": "1.0234375",
+    "rotations": "3.125"
+  },
+  {
+    "voltage": "1.06640625",
+    "rotations": "3.25"
+  },
+  {
+    "voltage": "1.10546875",
+    "rotations": "3.375"
+  },
+  {
+    "voltage": "1.14453125",
+    "rotations": "3.5"
+  },
+  {
+    "voltage": "1.1875",
+    "rotations": "3.625"
+  },
+  {
+    "voltage": "1.2265625",
+    "rotations": "3.75"
+  },
+  {
+    "voltage": "1.265625",
+    "rotations": "3.875"
+  },
+  {
+    "voltage": "1.30859375",
+    "rotations": "4"
+  },
+  {
+    "voltage": "1.34765625",
+    "rotations": "4.125"
+  },
+  {
+    "voltage": "1.38671875",
+    "rotations": "4.25"
+  },
+  {
+    "voltage": "1.42578125",
+    "rotations": "4.375"
+  },
+  {
+    "voltage": "1.46875",
+    "rotations": "4.5"
+  },
+  {
+    "voltage": "1.5078125",
+    "rotations": "4.625"
+  },
+  {
+    "voltage": "1.55078125",
+    "rotations": "4.75"
+  },
+  {
+    "voltage": "1.58984375",
+    "rotations": "4.875"
+  },
+  {
+    "voltage": "1.62890625",
+    "rotations": "5"
+  },
+  {
+    "voltage": "1.671875",
+    "rotations": "5.125"
+  },
+  {
+    "voltage": "1.7109375",
+    "rotations": "5.25"
+  },
+  {
+    "voltage": "1.75390625",
+    "rotations": "5.375"
+  },
+  {
+    "voltage": "1.79296875",
+    "rotations": "5.5"
+  },
+  {
+    "voltage": "1.83203125",
+    "rotations": "5.625"
+  },
+  {
+    "voltage": "1.875",
+    "rotations": "5.75"
+  },
+  {
+    "voltage": "1.9140625",
+    "rotations": "5.875"
+  },
+  {
+    "voltage": "1.95703125",
+    "rotations": "6"
+  },
+  {
+    "voltage": "1.99609375",
+    "rotations": "6.125"
+  },
+  {
+    "voltage": "2.0390625",
+    "rotations": "6.25"
+  },
+  {
+    "voltage": "2.078125",
+    "rotations": "6.375"
+  },
+  {
+    "voltage": "2.12109375",
+    "rotations": "6.5"
+  },
+  {
+    "voltage": "2.16015625",
+    "rotations": "6.625"
+  },
+  {
+    "voltage": "2.203125",
+    "rotations": "6.75"
+  },
+  {
+    "voltage": "2.2421875",
+    "rotations": "6.875"
+  },
+  {
+    "voltage": "2.28515625",
+    "rotations": "7"
+  },
+  {
+    "voltage": "2.328125",
+    "rotations": "7.125"
+  },
+  {
+    "voltage": "2.37109375",
+    "rotations": "7.25"
+  },
+  {
+    "voltage": "2.41015625",
+    "rotations": "7.375"
+  },
+  {
+    "voltage": "2.453125",
+    "rotations": "7.5"
+  },
+  {
+    "voltage": "2.49609375",
+    "rotations": "7.625"
+  },
+  {
+    "voltage": "2.53515625",
+    "rotations": "7.75"
+  },
+  {
+    "voltage": "2.578125",
+    "rotations": "7.875"
+  },
+  {
+    "voltage": "2.62109375",
+    "rotations": "8"
+  },
+  {
+    "voltage": "2.6640625",
+    "rotations": "8.125"
+  },
+  {
+    "voltage": "2.70703125",
+    "rotations": "8.25"
+  },
+  {
+    "voltage": "2.75",
+    "rotations": "8.375"
+  },
+  {
+    "voltage": "2.79296875",
+    "rotations": "8.5"
+  },
+  {
+    "voltage": "2.83984375",
+    "rotations": "8.625"
+  },
+  {
+    "voltage": "2.8828125",
+    "rotations": "8.75"
+  },
+  {
+    "voltage": "2.9296875",
+    "rotations": "8.875"
+  },
+  {
+    "voltage": "2.97265625",
+    "rotations": "9"
+  },
+  {
+    "voltage": "3.01953125",
+    "rotations": "9.125"
+  },
+  {
+    "voltage": "3.06640625",
+    "rotations": "9.25"
+  },
+  {
+    "voltage": "3.109375",
+    "rotations": "9.375"
+  },
+  {
+    "voltage": "3.15625",
+    "rotations": "9.5"
+  },
+  {
+    "voltage": "3.203125",
+    "rotations": "9.625"
+  },
+  {
+    "voltage": "3.24609375",
+    "rotations": "9.75"
+  },
+  {
+    "voltage": "3.2890625",
+    "rotations": "9.875"
+  },
+  {
+    "voltage": "3.33203125",
+    "rotations": "10"
+  }
+]
