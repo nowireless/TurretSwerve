@@ -5,7 +5,7 @@ import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.RelativeEncoder;
 import com.swervedrivespecialties.swervelib.DriveController;
 import com.swervedrivespecialties.swervelib.DriveControllerFactory;
-import com.swervedrivespecialties.swervelib.ModuleConfiguration;
+import com.swervedrivespecialties.swervelib.MechanicalConfiguration;
 
 import static com.swervedrivespecialties.swervelib.rev.RevUtils.checkNeoError;
 
@@ -58,7 +58,7 @@ public class NeoDriveControllerFactoryBuilder {
          * @return
          */
         @Override
-        public ControllerImplementation create(Integer id, ModuleConfiguration moduleConfiguration) {
+        public ControllerImplementation create(Integer id, String canbus, MechanicalConfiguration moduleConfiguration) {
             CANSparkMax motor = new CANSparkMax(id, CANSparkMaxLowLevel.MotorType.kBrushless);
             motor.setInverted(moduleConfiguration.isDriveInverted());
 
@@ -117,6 +117,11 @@ public class NeoDriveControllerFactoryBuilder {
             this.encoder = encoder;
         }
 
+        @Override
+        public Object getDriveMotor() {
+            return motor;
+        }
+
         /**
          * TODO
          * @param voltage
@@ -133,6 +138,11 @@ public class NeoDriveControllerFactoryBuilder {
         @Override
         public double getStateVelocity() {
             return encoder.getVelocity();
+        }
+
+        @Override
+        public double getStateDistance() {
+            return encoder.getPosition();
         }
     }
 }

@@ -1,7 +1,8 @@
 package com.kennedyrobotics.swerve.rev;
 
 import com.revrobotics.*;
-import com.swervedrivespecialties.swervelib.ModuleConfiguration;
+import com.swervedrivespecialties.swervelib.AbsoluteEncoder;
+import com.swervedrivespecialties.swervelib.MechanicalConfiguration;
 import com.swervedrivespecialties.swervelib.SteerController;
 import com.swervedrivespecialties.swervelib.SteerControllerFactory;
 import edu.wpi.first.math.MathUtil;
@@ -86,7 +87,7 @@ public class Neo550SteerControllerFactoryBuilder {
         }
 
         @Override
-        public ControllerImplementation create(Neo550SteerConfiguration steerConfiguration, ModuleConfiguration moduleConfiguration) {
+        public ControllerImplementation create(Neo550SteerConfiguration steerConfiguration, String canbus, MechanicalConfiguration moduleConfiguration) {
             CANSparkMax motor = new CANSparkMax(steerConfiguration.getMotorPort(), CANSparkMaxLowLevel.MotorType.kBrushless);
             motor.setInverted(moduleConfiguration.isSteerInverted());
             checkNeoError(motor.setIdleMode(CANSparkMax.IdleMode.kBrake), "Failed to set NEO idle mode");
@@ -178,6 +179,26 @@ public class Neo550SteerControllerFactoryBuilder {
             this.moduleOffset = moduleOffset;
             this.pidController = pidController;
             this.maxVoltage = maxVoltage;
+        }
+
+        @Override
+        public Object getSteerMotor() {
+            return this.motor;
+        }
+
+        @Override
+        public AbsoluteEncoder getSteerEncoder() {
+            return new AbsoluteEncoder() {
+                @Override
+                public double getAbsoluteAngle() {
+                    return getAbsoluteAngle();
+                }
+
+                @Override
+                public Object getInternal() {
+                    return absoluteEncoder;
+                }
+            };
         }
 
         /**

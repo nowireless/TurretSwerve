@@ -4,7 +4,8 @@ import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
-import com.swervedrivespecialties.swervelib.ModuleConfiguration;
+import com.swervedrivespecialties.swervelib.AbsoluteEncoder;
+import com.swervedrivespecialties.swervelib.MechanicalConfiguration;
 import com.swervedrivespecialties.swervelib.SteerController;
 import com.swervedrivespecialties.swervelib.SteerControllerFactory;
 import edu.wpi.first.math.MathUtil;
@@ -93,7 +94,7 @@ public class TalonSRXSteerControllerFactoryBuilder {
         }
 
         @Override
-        public ControllerImplementation create(TalonSRXSteerConfiguration talonSRXSteerConfiguration, ModuleConfiguration moduleConfiguration) {
+        public ControllerImplementation create(TalonSRXSteerConfiguration talonSRXSteerConfiguration, String canbus, MechanicalConfiguration moduleConfiguration) {
             TalonSRXConfiguration motorConfiguration = new TalonSRXConfiguration();
 
             if (!hasVoltageCompensation()) {
@@ -165,6 +166,12 @@ public class TalonSRXSteerControllerFactoryBuilder {
         private final double maxVoltage;
 
         private Rotation2d referenceAngle = new Rotation2d();
+        private AbsoluteEncoder absoluteEncoderShim = new AbsoluteEncoder() {
+            @Override
+            public double getAbsoluteAngle() {
+                return getAbsoluteAngle();
+            }
+        };
 
         public ControllerImplementation(TalonSRX motor, Rotation2d moduleOffset, PIDController pidController, double maxVoltage) {
             this.motor = motor;
@@ -173,6 +180,16 @@ public class TalonSRXSteerControllerFactoryBuilder {
             this.maxVoltage = maxVoltage;
         }
 
+
+        @Override
+        public Object getSteerMotor() {
+            return this.motor;
+        }
+
+        @Override
+        public AbsoluteEncoder getSteerEncoder() {
+            return null;
+        }
 
         @Override
         public double getReferenceAngle() {

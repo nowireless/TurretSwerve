@@ -108,13 +108,13 @@ public class SASModuleHelper {
         V1(SASModuleConfigurations.V1),
         V2(SASModuleConfigurations.V2);
 
-        private final ModuleConfiguration configuration;
+        private final MechanicalConfiguration configuration;
 
-        GearRatio(ModuleConfiguration configuration) {
+        GearRatio(MechanicalConfiguration configuration) {
             this.configuration = configuration;
         }
 
-        public ModuleConfiguration getConfiguration() {
+        public MechanicalConfiguration getConfiguration() {
             return configuration;
         }
 
