@@ -14,21 +14,20 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.DriveWithController;
-import frc.robot.commands.TurretPotCalibrationCommand;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterHood;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.Vision;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,14 +52,14 @@ import static frc.robot.Constants.*;
  */
 public class RobotContainer {
   // OI
-  private final XboxController m_controller = new XboxController(0);
+  private final CommandXboxController m_controller = new CommandXboxController(0);
 
   // The robot's subsystems and commands are defined here...
   private final Drivetrain m_drivetrain = new Drivetrain();
   private final Shooter m_shooter = new Shooter();
   private final ShooterHood m_shooterHood = new ShooterHood();
   private final Vision m_vision = new Vision(); 
-  // private final Turret m_turret = new Turret();
+  private final Turret m_turret = new Turret();
 
   //Auto
   private final RevDigit m_revDigit;
@@ -69,13 +68,10 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure default commands
-    m_drivetrain.setDefaultCommand(new DriveWithController(m_drivetrain, m_controller));
-
+    m_drivetrain.setDefaultCommand(new DriveWithController(m_drivetrain, m_controller.getHID()));
 
     // Configure the button bindings
     configureButtonBindings();
-
-    // SmartDashboard.putData("Turret Calibrate", new TurretPotCalibrationCommand(m_turret));
 
     // Path planner stuff
     PathPlannerServer.startServer(5811);
@@ -101,28 +97,25 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    new JoystickButton(m_controller, XboxController.Button.kStart.value)
-        .whenPressed(new InstantCommand(m_drivetrain::zeroHeading)); // TODO this should also do something with odometry? As it freaks out
+    // TODO this should also do something with odometry? As it freaks out 
+    m_controller.start().onTrue(new InstantCommand(m_drivetrain::zeroHeading)); 
 
-    // new JoystickButton(m_controller, XboxController.Button.kA.value)
-    //     .whileHeld(new FunctionalCommand(
-    //         () -> {},
-    //         () -> {
-    //           double power = m_controller.getRightX();
-    //           m_turret.setPower(Math.copySign(power * power, power));
-    //         },
-    //         (interrupted) -> m_turret.setPower(0),
-    //         () -> false,
-    //         m_turret
-    //     ));
+    m_controller.a().whileTrue(new FunctionalCommand(
+      () -> {},
+      () -> {
+        double power = m_controller.getRightX();
+        m_turret.setPower(Math.copySign(power * power, power));
+      },
+      (interrupted) -> m_turret.setPower(0),
+      () -> false,
+      m_turret
+    ));
   }
 
   public void onTeleopInit() {
-    // m_turret.syncMotorEncoder();
   }
 
   public void onAutonomousInit() {
-    // m_turret.syncMotorEncoder();
   }
 
   /**

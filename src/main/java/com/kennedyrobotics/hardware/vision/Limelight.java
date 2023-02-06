@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.util.Color;
 
 import java.util.Optional;
 
@@ -43,6 +44,7 @@ public class Limelight {
     }
 
     private final NetworkTable m_limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+    // Basic targetting data
     private final NetworkTableEntry m_tv = m_limelightTable.getEntry("tv");
     private final NetworkTableEntry m_tx = m_limelightTable.getEntry("tx");
     private final NetworkTableEntry m_ty = m_limelightTable.getEntry("ty");
@@ -54,6 +56,11 @@ public class Limelight {
     private final NetworkTableEntry m_thor = m_limelightTable.getEntry("thor");
     private final NetworkTableEntry m_tvert = m_limelightTable.getEntry("tvert");
     private final NetworkTableEntry m_getpipe = m_limelightTable.getEntry("getpipe");
+    private final NetworkTableEntry m_json = m_limelightTable.getEntry("json");
+    private final NetworkTableEntry m_tclass = m_limelightTable.getEntry("tclass");
+    private final NetworkTableEntry m_tc = m_limelightTable.getEntry("tc");
+
+    // Configuration
     private final NetworkTableEntry m_pipeline = m_limelightTable.getEntry("pipeline");
     private final NetworkTableEntry m_snapshot = m_limelightTable.getEntry("snapshot");
     private final NetworkTableEntry m_crop = m_limelightTable.getEntry("crop");
@@ -173,6 +180,36 @@ public class Limelight {
         return Optional.of(
             m_tvert.getDouble(-1)
         );
+    }
+
+    /**
+     * Class ID of primary neural detector result or neural classifier result
+     * @return if target present, the class ID of the target
+     */
+    public Optional<Integer> getTargetClass() {
+        if (!isTargetPresent()) return Optional.empty();
+
+        return Optional.of(
+            (int)m_tclass.getDouble(-1)
+        );
+    }
+
+    /**
+     * Full JSON dump of targeting results
+     * @return
+     */
+    public String getJSONRaw() {
+        return m_json.getString("null");
+    }
+
+    /**
+     * Get the average HSV color underneath the crosshair region as a NumberArray
+     * @return The color under the cross hair
+     */
+    public Color getCrossHairAverageColor() {
+        var hsvColor = m_tc.getNumberArray(new Number[]{0,0,0});
+
+        return Color.fromHSV((int)hsvColor[0], (int)hsvColor[1], (int)hsvColor[2]);
     }
 
     /**

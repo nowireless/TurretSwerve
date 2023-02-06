@@ -4,22 +4,15 @@
 
 package frc.robot.subsystems;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ctre.phoenix.sensors.*;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxAnalogSensor;
 import com.team254.lib.util.InterpolatingDouble;
-import com.team254.lib.util.InterpolatingTreeMap;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,21 +20,29 @@ import static frc.robot.Constants.*;
 
 public class Turret extends SubsystemBase {
 
+  private static final double kEncoderResetIterations = 500;
+  private static final double kEncoderResetMaxAngularVelocity = 0.5; // Degrees per second
+
+
   public static class DataPoint {
     public double voltage;
     public double motorAngle;
   }
 
   public enum Fault {
-    kPotentiometerDisconnected,
-    kPotentiometerOutOfRange
+    kAbsEncoderHardwareFault,
+    kAbsEncoderAPIError,
+    kAbsEncoderUnderVoltage,
+    kAbsEncoderResetDuringEnabled,
+    kAbsEncoderMagnetTooWeak,
+    kMotorEncoderNotSynced;
   }
 
   private final CANSparkMax m_motor;
   private final RelativeEncoder m_motorEncoder;
-  private final SparkMaxAnalogSensor m_potentiometer;
-
-  private final InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> m_potVoltageRotationMap = new InterpolatingTreeMap<>();
+  private final CANCoder m_absoluteEncoder;
+  private int m_encoderResetIteration;
+  private boolean m_motorEncoderSynced;
 
   /** Creates a new ExampleSubsystem. */
   public Turret() {
@@ -91,62 +92,47 @@ public class Turret extends SubsystemBase {
 
 
     //
-    // Potentiometer
+    // Absolute Encoder
     //
-    m_potentiometer = m_motor.getAnalog(SparkMaxAnalogSensor.Mode.kAbsolute);
-    m_potentiometer.setInverted(motorInverted);
-
-
-    // Assumptions
-    // - turret has 140 tooth gear
-    // - potentiometer has a 16 tooth gear
-    // - potentiometer is a 10 turn pot
-    // - max voltage is 3.3v volts
-
-    // //           10 Rotations   16 Pot Gear       360 degrees             10*16*360 Degrees
-    // // Voltage * ------------ * --------------- * ----------- = Voltage * -----------------
-    // //           3.3 Volts      140 Turret gear   1 Rotation              3.3*140   Volts
-    // double potentiometerConversionFactor = (10.0/3.3) * (16.0/140.0) * 360.0;
-    // m_potentiometer.setPositionConversionFactor(potentiometerConversionFactor);
-    // m_potentiometer.setVelocityConversionFactor(potentiometerConversionFactor);
-    m_potentiometer.setPositionConversionFactor(1); // Volts
-    m_potentiometer.setVelocityConversionFactor(1); // Volts/sec
-
-    //
-    // Build potentiometer lookup table
-    //
-
-    // TODO write a unit test to verify that this can be read, and put into a interpolating tree map
-    ObjectMapper objectMapper = new ObjectMapper();
-    DataPoint[] dataPoints;
-    try {
-      File file = Paths.get(Filesystem.getDeployDirectory() + "/turrent-encoder-data-processed.json").toFile();
-      dataPoints = objectMapper.readValue(file, DataPoint[].class);
-    } catch (IOException e) {
-      DriverStation.reportError("Failed to read turret-pot-voltage-rotations.json", true);
-      throw new RuntimeException(e);
-    }
-
-    for (var dataPoint : dataPoints) {
-      System.out.println("Voltage: " + dataPoint.voltage+ ", MotorAngle: " + dataPoint.motorAngle);
-      m_potVoltageRotationMap.put(
-        new InterpolatingDouble(dataPoint.voltage),
-        new InterpolatingDouble(dataPoint.motorAngle)
-      );
-    }
-
+    m_absoluteEncoder = new CANCoder(TurretConstants.kEncoderID);
+    CANCoderConfiguration absoluteEncoderConfiguration = new CANCoderConfiguration();
+    absoluteEncoderConfiguration.sensorDirection = true;
+    absoluteEncoderConfiguration.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
+    absoluteEncoderConfiguration.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
+    absoluteEncoderConfiguration.magnetOffsetDegrees = TurretConstants.kOffset.getDegrees();
+    m_absoluteEncoder.configAllSettings(absoluteEncoderConfiguration);
   }
 
   public List<Fault> getFaults() {
     List<Fault> faults = new ArrayList<>();
 
-    if (m_potentiometer.getVoltage() < 0.1) {
-      faults.add(Fault.kPotentiometerDisconnected);
+    CANCoderFaults absoluteEncoderFaults = new CANCoderFaults();
+    m_absoluteEncoder.getFaults(absoluteEncoderFaults);
+
+
+    if (absoluteEncoderFaults.HardwareFault) {
+      faults.add(Fault.kAbsEncoderHardwareFault);
     }
 
-//    if (getPotentiometerRotations() == null) {
-//      faults.add(Fault.kPotentiometerOutOfRange);
-//    }
+    if (absoluteEncoderFaults.APIError) {
+      faults.add(Fault.kAbsEncoderAPIError);
+    }
+
+    if (absoluteEncoderFaults.UnderVoltage) {
+      faults.add(Fault.kAbsEncoderUnderVoltage);
+    }
+
+    if (absoluteEncoderFaults.ResetDuringEn) {
+      faults.add(Fault.kAbsEncoderResetDuringEnabled);
+    }
+
+    if (absoluteEncoderFaults.MagnetTooWeak) {
+      faults.add(Fault.kAbsEncoderMagnetTooWeak);
+    }
+
+    if (!m_motorEncoderSynced) {
+      faults.add(Fault.kMotorEncoderNotSynced);
+    }
 
     return faults;
   }
@@ -167,49 +153,16 @@ public class Turret extends SubsystemBase {
   public Rotation2d getAngle() {
     // For right now we will use the pot for the angle.
     // Alternatively the motor angle could be used, and be seeded from the pot angle.
-    return getPotentiometerAngle();
+    return getMotorAngle();
   }
 
-//  /**
-//   *
-//   * @return rotations or null if the potentimaters voltage is out of range;
-//   */
-//  public InterpolatingDouble getPotentiometerRotations() {
-//    return m_potVoltageRotationMap.getInterpolated(
-//        new InterpolatingDouble(m_potentiometer.getVoltage())
-//    );
-//  }
 
-  public Rotation2d getPotentiometerAngle() {
-//     //             16 Pot Gear       360 degrees               16*360 Degrees
-//     // Rotations * --------------- * ----------- = Rotations * -----------------
-//     //             140 Turret gear   1 Rotation                140   Rotations
-//
-//
-//    InterpolatingDouble rotations = getPotentiometerRotations();
-//    if (rotations == null) {
-//      return new Rotation2d(); // IDK ideally if this happens the turret will have disabled itself...
-//    }
-//
-//
-//    return Rotation2d.fromDegrees(rotations.value * (16.0/140.0) * 360.0).plus(TurretConstants.kOffset);
-
-    // TODO handle outof bounds gracefully...
-    return Rotation2d.fromDegrees(m_potVoltageRotationMap.getInterpolated(
-        new InterpolatingDouble(m_potentiometer.getVoltage())
-    ).value);
-  }
-
-  public double getPotentiometerVoltage() {
-    return m_potentiometer.getVoltage();
+  public Rotation2d getAbsoluteAngle() {
+    return Rotation2d.fromDegrees(m_absoluteEncoder.getAbsolutePosition());
   }
 
   public Rotation2d getMotorAngle() {
     return Rotation2d.fromDegrees(m_motorEncoder.getPosition());
-  }
-
-  public void syncMotorEncoder() {
-    m_motorEncoder.setPosition(getPotentiometerAngle().getDegrees());
   }
 
   public void setPower(double percent) {
@@ -220,13 +173,33 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    //
+    // Handle syncing positions between the absolute encoder and NEO encoder
+    //
+
+    // Reset the NEO's encoder periodically when the turret is not rotating.
+    // Sometimes (~5% of the time) when we initialize, the absolute encoder isn't fully set up, and we don't
+    // end up getting a good reading. If we reset periodically this won't matter anymore.
+    if (m_motorEncoder.getVelocity() <  kEncoderResetMaxAngularVelocity) {
+      if (++m_encoderResetIteration >= kEncoderResetIterations) {
+        m_encoderResetIteration = 0;
+        m_motorEncoder.setPosition(getAbsoluteAngle().getDegrees());
+        m_motorEncoderSynced = true;
+      }
+    } else {
+      m_encoderResetIteration = 0;
+    }
+
+    //
+    // Dashboard data
+    //
     SmartDashboard.putNumber("Turret Angle", getAngle().getDegrees());
-    SmartDashboard.putNumber("Turret Potentiometer Angle", getPotentiometerAngle().getDegrees());
-    SmartDashboard.putNumber("Turret Potentiometer Voltage", m_potentiometer.getVoltage());
-    SmartDashboard.putNumber("Turret Motor Angle", getMotorAngle().getDegrees());
+    SmartDashboard.putNumber("Turret Absolute Angle", getAbsoluteAngle().getDegrees());
+    SmartDashboard.putNumber("Turret Encoder Reset Iterations", m_encoderResetIteration);
+    SmartDashboard.putBoolean("Turret Motor Encoder synced", m_motorEncoderSynced);
     SmartDashboard.putStringArray("Turret Faults", getFaultStrings());
 
-    SmartDashboard.putNumber("Turret Angle lag", getPotentiometerAngle().minus(getMotorAngle()).getDegrees());
   }
 
   @Override
