@@ -8,6 +8,9 @@ import com.ctre.phoenix.sensors.Pigeon2;
 import com.kennedyrobotics.swerve.SASModuleConfiguration;
 import com.kennedyrobotics.swerve.SASModuleHelper;
 import com.swervedrivespecialties.swervelib.SwerveModule;
+
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.*;
@@ -29,7 +32,7 @@ public class Drivetrain extends SubsystemBase {
 
 
   // Helpers
-  private final SwerveDriveOdometry m_odometry;
+  private final SwerveDrivePoseEstimator m_poseEstimator;
   private final Field2d m_field = new Field2d();
 
   // Hardware
@@ -131,7 +134,16 @@ public class Drivetrain extends SubsystemBase {
     );
 
     // Odometry class for tracking robot pose
-    m_odometry = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, getHeading(), getModulePositions());
+    // Here we use SwerveDrivePoseEstimator so that we can fuse odometry readings. The numbers used
+    // below are robot specific, and should be tuned.
+    m_poseEstimator = new SwerveDrivePoseEstimator(
+      DriveConstants.kDriveKinematics,
+      getHeading(),
+      getModulePositions(),
+      new Pose2d(),
+      VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
+      VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
+    );
 
     tab.add("Field", m_field)
         .withSize(5, 4)
@@ -142,9 +154,9 @@ public class Drivetrain extends SubsystemBase {
         .withSize(2, 2)
         .withPosition(10,0);
 
-    odometryTab.addNumber("X (inches)", () -> Units.metersToInches(m_odometry.getPoseMeters().getX()));
-    odometryTab.addNumber("Y (inches)", () -> Units.metersToInches(m_odometry.getPoseMeters().getY()));
-    odometryTab.addNumber("Theta (degrees)", () -> m_odometry.getPoseMeters().getRotation().getDegrees());
+    odometryTab.addNumber("X (inches)", () -> Units.metersToInches(m_poseEstimator.getEstimatedPosition().getX()));
+    odometryTab.addNumber("Y (inches)", () -> Units.metersToInches(m_poseEstimator.getEstimatedPosition().getY()));
+    odometryTab.addNumber("Theta (degrees)", () -> m_poseEstimator.getEstimatedPosition().getRotation().getDegrees());
   }
 
   public Rotation2d getHeading() {
@@ -176,7 +188,7 @@ public class Drivetrain extends SubsystemBase {
    * @return The pose.
    */
   public Pose2d getPose() {
-    return m_odometry.getPoseMeters();
+    return m_poseEstimator.getEstimatedPosition();
   }
 
   /**
@@ -185,7 +197,7 @@ public class Drivetrain extends SubsystemBase {
    * @param pose The pose to which to set the odometry.
    */
   public void resetOdometry(Pose2d pose) {
-    m_odometry.resetPosition(getHeading(), getModulePositions(), pose);
+    m_poseEstimator.resetPosition(getHeading(), getModulePositions(), pose);
   }
 
   /**
@@ -289,13 +301,21 @@ public class Drivetrain extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // Update the odometry in the periodic block
-    SwerveModuleState[] moduleStates = getModuleStates();
-    m_odometry.update(
+    m_poseEstimator.update(
         getHeading(),
         getModulePositions()
     );
 
-    m_field.setRobotPose(m_odometry.getPoseMeters());
+    // Also apply vision measurements. We use 0.3 seconds in the past as an example -- on
+    // a real robot, this must be calculated based either on latency or timestamps.
+
+    // TODO would be cool to if this was passed in via a lambda
+    // m_poseEstimator.addVisionMeasurement(
+    //     ExampleGlobalMeasurementSensor.getEstimatedGlobalPose(
+    //         m_poseEstimator.getEstimatedPosition()),
+    //     Timer.getFPGATimestamp() - 0.3);
+
+    m_field.setRobotPose(m_poseEstimator.getEstimatedPosition());
   }
 
   @Override
