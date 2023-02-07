@@ -145,18 +145,32 @@ public class Drivetrain extends SubsystemBase {
       VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
     );
 
-    tab.add("Field", m_field)
-        .withSize(5, 4)
-        .withPosition(8,2)
-        .withWidget(BuiltInWidgets.kField);
+    var driveConstants = tab.getLayout("Constants", BuiltInLayouts.kList)
+      .withSize(2, 2)
+      .withPosition(12, 0);
 
-    var odometryTab = tab.getLayout("Odometry", BuiltInLayouts.kList)
+    driveConstants.addNumber("kWheelDiameterMeters", ()->DriveConstants.kWheelDiameterMeters);
+    driveConstants.addNumber("kWheelBaseLengthMeters", ()->DriveConstants.kWheelBaseLengthMeters);
+    driveConstants.addNumber("kTrackWidthMeters", ()->DriveConstants.kTrackWidthMeters);
+    driveConstants.addNumber("kDriveGearReduction", ()->DriveConstants.kDriveGearReduction);
+    driveConstants.addNumber("kMaxDriveVelocityMetersPerSecond", ()->DriveConstants.kMaxDriveVelocityMetersPerSecond);
+    driveConstants.addNumber("kMaxAngularVelocityRadiansPerSecond", ()->DriveConstants.kMaxAngularVelocityRadiansPerSecond);
+
+    var odoemtryTab = Shuffleboard.getTab("Odometry");
+    odoemtryTab.add("Field", m_field)
+      .withSize(8, 5)
+      .withPosition(0,0)
+      .withWidget(BuiltInWidgets.kField);
+
+    var odometryList = odoemtryTab.getLayout("Odometry", BuiltInLayouts.kList)
         .withSize(2, 2)
-        .withPosition(10,0);
+        .withPosition(8,0);
 
-    odometryTab.addNumber("X (inches)", () -> Units.metersToInches(m_poseEstimator.getEstimatedPosition().getX()));
-    odometryTab.addNumber("Y (inches)", () -> Units.metersToInches(m_poseEstimator.getEstimatedPosition().getY()));
-    odometryTab.addNumber("Theta (degrees)", () -> m_poseEstimator.getEstimatedPosition().getRotation().getDegrees());
+    odometryList.addNumber("X (inches)", () -> Units.metersToInches(m_poseEstimator.getEstimatedPosition().getX()));
+    odometryList.addNumber("Y (inches)", () -> Units.metersToInches(m_poseEstimator.getEstimatedPosition().getY()));
+    odometryList.addNumber("Theta (degrees)", () -> m_poseEstimator.getEstimatedPosition().getRotation().getDegrees());
+
+
   }
 
   public Rotation2d getHeading() {

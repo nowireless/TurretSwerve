@@ -53,10 +53,10 @@ public final class Constants {
 
         public static final double kDriveGearReduction = SASModuleHelper.GearRatio.V2.getConfiguration().getDriveReduction();
 
-        //  FreeSpeed Radians   1 Rotation                     kWheelDiameter Meters   FreeSpeed * kGearReduction * kWheelDiameter Meters
-        //  ----------------- * ----------- * kGearReduction * --------------------- = --------------------------------------------------
-        //  1 Second            2PI Radians                    1 Rotation              2PI Second
-        public static final double kMaxDriveVelocityMetersPerSecond = DCMotor.getNEO(1).freeSpeedRadPerSec / (2*Math.PI) * kDriveGearReduction * kWheelDiameterMeters;
+        //  FreeSpeed Radians   1 Rotation                     kWheelDiameter * PI Meters   FreeSpeed * kGearReduction * kWheelDiameter Meters
+        //  ----------------- * ----------- * kGearReduction * -------------------------- = --------------------------------------------------
+        //  1 Second            2PI Radians                    1 Rotation                   2 Second
+        public static final double kMaxDriveVelocityMetersPerSecond = DCMotor.getNEO(1).freeSpeedRadPerSec / (2.0) * kDriveGearReduction * kWheelDiameterMeters;
 
         /**
          * The maximum angular velocity of the robot in radians per second.
@@ -95,7 +95,7 @@ public final class Constants {
 
         public static final int kFrontRightMotorDriveID = 14;
         public static final int kFrontRightMotorSteerID = 15;
-        public static final Rotation2d kFrontRightOffset = Rotation2d.fromDegrees(-139);
+        public static final Rotation2d kFrontRightOffset = Rotation2d.fromDegrees(-129);
 
         public static final int kRearRightMotorDriveID = 16;
         public static final int kRearRightMotorSteerID = 17;
